@@ -1,0 +1,1 @@
+CalmMind is a mobile mental health application designed to help individuals navigate relationship attachment issues through personalized, science-backed affirmations. Built with React Native and Spring Boot, the app categorizes affirmations by attachment style and will feature validated attachment style assessments.
