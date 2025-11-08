@@ -1,0 +1,15 @@
+/Users/ahmadbishara/Desktop/CalmMind/calmmind-backend/src/main/java/com/calmmind/backend/repository/UserRepository.java
+/Users/ahmadbishara/Desktop/CalmMind/calmmind-backend/src/main/java/com/calmmind/backend/service/AffirmationService.java
+/Users/ahmadbishara/Desktop/CalmMind/calmmind-backend/src/main/java/com/calmmind/backend/service/IAffirmationService.java
+/Users/ahmadbishara/Desktop/CalmMind/calmmind-backend/src/main/java/com/calmmind/backend/strategy/NotificationMessage.java
+/Users/ahmadbishara/Desktop/CalmMind/calmmind-backend/src/main/java/com/calmmind/backend/service/UserService.java
+/Users/ahmadbishara/Desktop/CalmMind/calmmind-backend/src/main/java/com/calmmind/backend/model/User.java
+/Users/ahmadbishara/Desktop/CalmMind/calmmind-backend/src/main/java/com/calmmind/backend/controller/AffirmationController.java
+/Users/ahmadbishara/Desktop/CalmMind/calmmind-backend/src/main/java/com/calmmind/backend/dto/RegisterRequest.java
+/Users/ahmadbishara/Desktop/CalmMind/calmmind-backend/src/main/java/com/calmmind/backend/model/Affirmation.java
+/Users/ahmadbishara/Desktop/CalmMind/calmmind-backend/src/main/java/com/calmmind/backend/controller/UserController.java
+/Users/ahmadbishara/Desktop/CalmMind/calmmind-backend/src/main/java/com/calmmind/backend/model/AttachmentStyle.java
+/Users/ahmadbishara/Desktop/CalmMind/calmmind-backend/src/main/java/com/calmmind/backend/dto/LoginRequest.java
+/Users/ahmadbishara/Desktop/CalmMind/calmmind-backend/src/main/java/com/calmmind/backend/CalmMindBackendApplication.java
+/Users/ahmadbishara/Desktop/CalmMind/calmmind-backend/src/main/java/com/calmmind/backend/service/IUserService.java
+/Users/ahmadbishara/Desktop/CalmMind/calmmind-backend/src/main/java/com/calmmind/backend/repository/AffirmationRepository.java
