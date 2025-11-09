@@ -78,7 +78,7 @@ function HomeScreen({ route, navigation }) {
           {/* Quiz Card */}
           <TouchableOpacity 
             style={styles.quizCard}
-            onPress={() => alert('Start Quiz')}
+            onPress={() => navigation.navigate('Quiz', { user })}
             activeOpacity={0.8}
           >
             <Text style={styles.quizIcon}>❓</Text>
@@ -88,6 +88,7 @@ function HomeScreen({ route, navigation }) {
             <View style={styles.quizButton}>
               <Text style={styles.quizButtonText}>Start Quiz →</Text>
             </View>
+
           </TouchableOpacity>
         </View>
 

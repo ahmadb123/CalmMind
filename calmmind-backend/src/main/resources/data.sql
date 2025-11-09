@@ -62,3 +62,24 @@ INSERT INTO affirmations (message, attachment_style, category) VALUES
 ('You''re allowed to set boundaries and still be a loving person.', 'GENERAL', 'RELATIONSHIP'),
 ('Self-compassion is the foundation of all healthy relationships.', 'GENERAL', 'DAILY'),
 ('You don''t have to be perfect to be loved. You just have to be you.', 'GENERAL', 'DAILY');
+
+
+-- QUIZ QUESTIONS (12 questions for attachment style assessment)
+
+-- ANXIETY Questions (Questions 1-6)
+INSERT INTO quiz_questions (question_text, dimension, question_number) VALUES
+('I''m afraid that I will lose my partner''s love.', 'ANXIETY', 1),
+('I often worry that my partner doesn''t really love me.', 'ANXIETY', 2),
+('I worry a lot about my relationships.', 'ANXIETY', 3),
+('I''m afraid that once a romantic partner gets to know me, he or she won''t like who I really am.', 'ANXIETY', 4),
+('I often worry that my partner will not want to stay with me.', 'ANXIETY', 5),
+('When I show my feelings for romantic partners, I''m afraid they will not feel the same about me.', 'ANXIETY', 6);
+
+-- AVOIDANCE Questions (Questions 7-12)
+INSERT INTO quiz_questions (question_text, dimension, question_number) VALUES
+('I prefer not to show a partner how I feel deep down.', 'AVOIDANCE', 7),
+('I find it difficult to allow myself to depend on romantic partners.', 'AVOIDANCE', 8),
+('I get uncomfortable when a romantic partner wants to be very close.', 'AVOIDANCE', 9),
+('I don''t feel comfortable opening up to romantic partners.', 'AVOIDANCE', 10),
+('I prefer not to be too close to romantic partners.', 'AVOIDANCE', 11),
+('I am nervous when partners get too close to me.', 'AVOIDANCE', 12);

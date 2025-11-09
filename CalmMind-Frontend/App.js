@@ -5,7 +5,7 @@ import LoginScreen from './src/screens/LoginScreen';
 import RegisterScreen from './src/screens//RegisterScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import SettingsScreen from './src/screens/SettingScreen';
-
+import QuizScreen from './src/screens/QuizScreen';
 const Stack = createNativeStackNavigator();
 
 function App(){
@@ -30,6 +30,11 @@ function App(){
         <Stack.Screen 
           name="Settings"
           component={SettingsScreen}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen 
+          name="Quiz"
+          component={QuizScreen}
           options={{headerShown: false}}
         />
       </Stack.Navigator>
