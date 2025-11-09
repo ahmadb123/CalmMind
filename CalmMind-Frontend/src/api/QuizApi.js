@@ -21,3 +21,25 @@ export async function fetchQuiz(){
         throw new Error(error.message || 'Failed to fetch quiz');
     }
 };
+
+export async function submitQuiz(userId, answers){
+    try{ // submitQuiz/{userId}
+        const response = await fetch(`${API_URL}/api/quiz/submitQuiz/${userId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(answers),
+        });
+        if(response.ok){
+            const data = await response.json();
+            return data;
+        }
+        else{
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to submit quiz');
+        }
+    }catch(error){
+        throw new Error(error.message || 'Failed to submit quiz');
+    }
+};

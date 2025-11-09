@@ -6,6 +6,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Map;
+
 
 @RestController 
 @RequestMapping("/api/quiz")
@@ -30,6 +32,21 @@ public class QuizController {
         }catch(Exception e){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("Error retrieving quiz questions: " + e.getMessage());
+        }
+    }
+    /** POST SUBMT QUIZ  */
+    @PostMapping("/submitQuiz/{userId}")
+    public ResponseEntity<?> submitQuiz(@PathVariable Long userId, @RequestBody Map<Integer,Integer> answers){
+        try{
+            if(userId == null || answers == null || answers.isEmpty()){
+                return ResponseEntity.badRequest().body("Invalid user ID or answers");
+            }
+            return ResponseEntity.ok(quizService.submitQuiz(userId, answers));
+        } catch (IllegalArgumentException e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Error submitting quiz: " + e.getMessage());
         }
     }
 }

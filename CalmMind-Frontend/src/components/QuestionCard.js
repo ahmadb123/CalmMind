@@ -1,79 +1,74 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import LikertScale from './LikertScale';
+import { View, Text, StyleSheet } from 'react-native';
+import LikertScale from './LikertScale';  // ← Remove curly braces
 
-const QuestionCard = ({ 
-  question, 
-  questionNumber, 
-  total, 
-  answer, 
-  onAnswer, 
-  onNext, 
-  onPrev 
-}) => {
+function QuestionCard({ question, value, onAnswer, disabled = false }) {
+  
+  // Determine icon based on dimension
+  const icon = question.dimension === 'ANXIETY' ? '💭' : '🛡️';
+  
   return (
     <View style={styles.card}>
-      <Text style={styles.text}>
-        {questionNumber}. {question.questionText}
-      </Text>
-
-      <LikertScale value={answer} onChange={onAnswer} />
-
-      <View style={styles.nav}>
-        <TouchableOpacity 
-          onPress={onPrev} 
-          disabled={questionNumber === 1}
-          style={[styles.btn, styles.backBtn, questionNumber === 1 && styles.disabled]}
-        >
-          <Text style={styles.backText}>← Back</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity 
-          onPress={onNext} 
-          disabled={!answer}
-          style={[styles.btn, styles.nextBtn, !answer && styles.disabled]}
-        >
-          <Text style={styles.nextText}>Next →</Text>
-        </TouchableOpacity>
+      
+      {/* Header: Icon + Question Number */}
+      <View style={styles.header}>
+        <Text style={styles.icon}>{icon}</Text>
+        <Text style={styles.questionNumber}>
+          Question {question.questionNumber}
+        </Text>
       </View>
+      
+      {/* Question Text */}
+      <Text style={styles.questionText}>
+        "{question.questionText}"
+      </Text>
+      
+      {/* Answer Scale */}
+      <LikertScale
+        value={value}
+        onSelect={onAnswer}
+        disabled={disabled}
+      />
+      
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#fff',
-    borderRadius: 20,
-    padding: 20,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 15,
+    padding: 25,
+    marginHorizontal: 20,
+    marginVertical: 10,
     shadowColor: '#000',
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 3,
-    width: '95%',
-    alignSelf: 'center'
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 5,
   },
-  text: { 
-    fontSize: 17, 
-    color: '#222', 
-    textAlign: 'center', 
-    marginBottom: 18, 
-    lineHeight: 24 
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 15,
   },
-  nav: { 
-    flexDirection: 'row', 
-    justifyContent: 'space-between', 
-    marginTop: 20 
+  icon: {
+    fontSize: 32,
+    marginRight: 12,
   },
-  btn: {
-    paddingVertical: 10,
-    paddingHorizontal: 22,
-    borderRadius: 12
+  questionNumber: {
+    fontSize: 14,
+    color: '#666',
+    fontWeight: '600',
   },
-  backBtn: { backgroundColor: '#f2f2f2' },
-  nextBtn: { backgroundColor: '#4FD1C5' },
-  backText: { color: '#555', fontWeight: '500' },
-  nextText: { color: 'white', fontWeight: '600' },
-  disabled: { opacity: 0.5 }
+  questionText: {
+    fontSize: 18,
+    color: '#333',
+    lineHeight: 26,
+    marginBottom: 25,
+    textAlign: 'center',
+    fontStyle: 'italic',
+  },
 });
 
 export default QuestionCard;
