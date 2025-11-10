@@ -6,6 +6,7 @@ import RegisterScreen from './src/screens//RegisterScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import SettingsScreen from './src/screens/SettingScreen';
 import QuizScreen from './src/screens/QuizScreen';
+import AttachmentInfoScreen from './src/screens/AttachmentInfoScreen';
 const Stack = createNativeStackNavigator();
 
 function App(){
@@ -35,6 +36,11 @@ function App(){
         <Stack.Screen 
           name="Quiz"
           component={QuizScreen}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen 
+          name="AttachmentInfo"
+          component={AttachmentInfoScreen}
           options={{headerShown: false}}
         />
       </Stack.Navigator>

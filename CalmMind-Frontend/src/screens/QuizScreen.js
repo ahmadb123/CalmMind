@@ -5,37 +5,94 @@ import {
   Text, 
   Alert, 
   StyleSheet, 
-  TouchableOpacity  // ← ADD THIS
+  TouchableOpacity,
+    ScrollView
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ProgressBar from '../components/ProgressBar';
 import QuestionCard from '../components/QuestionCard';
-import { fetchQuiz, submitQuiz } from '../api/QuizApi';
+import { fetchQuiz, submitQuiz, fetchQuizResults } from '../api/QuizApi';
 
 function QuizScreen({ route, navigation }) {
     const { user } = route.params || {};
-    
+    if(!user){
+        Alert.alert('Error', 'User not found. Please log in again.');
+        navigation.navigate('Login');
+        return null;
+    }
     const [quizQuestions, setQuizQuestions] = useState([]);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [answers, setAnswers] = useState({});
     const [quizLoading, setQuizLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
     
-    // Fetch quiz questions on mount
+    const[hasResults, setHasResults] = useState(false);
+    const[quizResults, setQuizResults] = useState(null);
+    const[showingQuiz, setShowingQuiz] = useState(true);
+    // Fetch quiz questions on mount 
+    // check if user has already taken the quiz 
+
     useEffect(() => {
-        const loadQuiz = async () => {
+        const checkQuizStatus = async () => {
+            if(!user?.id) {
+                Alert.alert('Error', 'User not found. Please log in again.');
+                navigation.navigate('Login');
+                return;
+            }
             setQuizLoading(true);
-            try {
-                const fetchedQuestions = await fetchQuiz();
-                setQuizQuestions(fetchedQuestions);
-            } catch (error) {
-                Alert.alert('Error', 'Failed to load quiz. Please try again later.');
-            } finally {
+            try{
+                const results = await fetchQuizResults(user.id);
+                if(results && results.attachmentStyle){
+                    setHasResults(true);
+                    setQuizResults(results);
+                    setShowingQuiz(false);
+                }
+                else{
+                    await loadQuiz();
+                }
+            }catch(error){
+                await loadQuiz();
+            }finally{
                 setQuizLoading(false);
             }
         };
-        loadQuiz();
+        checkQuizStatus();
     }, []);
+
+
+    const loadQuiz = async () => {
+        try {
+            const fetchedQuestions = await fetchQuiz();
+            setQuizQuestions(fetchedQuestions);
+            setShowingQuiz(true);
+        } catch (error) {
+            Alert.alert('Error', 'Failed to load quiz questions. Please try again later.');
+            console.error('Error loading quiz:', error);
+        } finally {
+            setQuizLoading(false);
+        }
+    };
+
+    // handle retake quiz:
+    const handleRetakeQuiz = async () => {
+        Alert.alert('Retake Quiz', 'Are you sure you want to retake the quiz?', [
+            {
+                text: 'Cancel',
+                style: 'cancel',
+            },
+            {
+                text: 'Yes',
+                onPress: async () => {
+                    setShowingQuiz(true);
+                    setHasResults(false);
+                    setQuizResults(null);
+                    setAnswers({});
+                    setCurrentQuestionIndex(0);
+                    await loadQuiz();
+                },
+            },
+        ]);
+    };
 
     // Handle answer selection
     const handleAnswer = (questionId, answerValue) => {
@@ -94,6 +151,79 @@ function QuizScreen({ route, navigation }) {
         );
     }
 
+      if(hasResults && !showingQuiz && quizResults){
+        return (
+            <SafeAreaView style={styles.safeArea}>
+                <ScrollView contentContainerStyle={styles.resultsContainer}>
+                    <Text style={styles.resultsTitle}>Your Quiz Results</Text>
+                    
+                    <View style={styles.resultCard}>
+                        <Text style={styles.resultLabel}>Attachment Style</Text>
+                        <Text style={styles.resultValue}>
+                            {quizResults.attachmentStyle.replace('_', ' ')}
+                        </Text>
+                    </View>
+
+                    <View style={styles.resultCard}>
+                        <Text style={styles.resultLabel}>Anxiety Score</Text>
+                        <Text style={styles.resultValue}>
+                            {quizResults.anxietyScore?.toFixed(2) || 'N/A'}
+                        </Text>
+                    </View>
+
+                    <View style={styles.resultCard}>
+                        <Text style={styles.resultLabel}>Avoidance Score</Text>
+                        <Text style={styles.resultValue}>
+                            {quizResults.avoidanceScore?.toFixed(2) || 'N/A'}
+                        </Text>
+                    </View>
+
+                    <TouchableOpacity
+                        style={styles.retakeButton}
+                        onPress={handleRetakeQuiz}
+                    >
+                        <Text style={styles.retakeButtonText}>Retake Quiz</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={styles.homeButton}
+                        onPress={() => navigation.navigate('Home', { 
+                            user: { ...user, attachmentStyle: quizResults.attachmentStyle } 
+                        })}
+                    >
+                        <Text style={styles.homeButtonText}>Go to Home</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={styles.moreInfoButton}
+                        onPress={() => navigation.navigate('AttachmentInfo', {
+                            user: user, 
+                            quizResults: quizResults
+                        })}
+                    >
+                        <Text style={styles.moreInfoButtonText}>Learn About Your Attachment Style</Text>
+                    </TouchableOpacity>
+                </ScrollView>
+            </SafeAreaView>
+        );
+    }
+
+    if (!quizQuestions || quizQuestions.length === 0) {
+        return (
+            <SafeAreaView style={styles.safeArea}>
+                <View style={styles.loadingContainer}>
+                    <Text style={styles.loadingText}>No quiz questions available.</Text>
+                    <TouchableOpacity 
+                        style={styles.retakeButton}
+                        onPress={() => navigation.goBack()}
+                    >
+                        <Text style={styles.retakeButtonText}>Go Back</Text>
+                    </TouchableOpacity>
+                </View>
+            </SafeAreaView>
+        );
+    }
+  
+
     const currentQuestion = quizQuestions[currentQuestionIndex];
     const isFirstQuestion = currentQuestionIndex === 0;
     const isLastQuestion = currentQuestionIndex === quizQuestions.length - 1;
@@ -110,7 +240,7 @@ function QuizScreen({ route, navigation }) {
                 
                 <QuestionCard
                     question={currentQuestion}
-                    value={answers[currentQuestion.id]}  // ← FIXED TYPO
+                    value={answers[currentQuestion.id]} 
                     onAnswer={(val) => handleAnswer(currentQuestion.id, val)}
                     disabled={submitting}
                 />
@@ -173,6 +303,82 @@ const styles = StyleSheet.create({
         marginTop: 10,
         fontSize: 16,
         color: '#666',
+    },
+    resultsContainer: {
+        padding: 20,
+        alignItems: 'center',
+    },
+    resultsTitle: {
+        fontSize: 28,
+        fontWeight: 'bold',
+        color: '#1D3557',
+        marginBottom: 30,
+        marginTop: 20,
+    },
+    resultCard: {
+        backgroundColor: '#FFF',
+        width: '100%',
+        padding: 20,
+        borderRadius: 15,
+        marginBottom: 15,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+    },
+    resultLabel: {
+        fontSize: 14,
+        color: '#666',
+        marginBottom: 5,
+    },
+    resultValue: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: '#1D3557',
+        textTransform: 'capitalize',
+    },
+    retakeButton: {
+        backgroundColor: '#457B9D',
+        paddingVertical: 15,
+        paddingHorizontal: 40,
+        borderRadius: 10,
+        marginTop: 30,
+        width: '100%',
+        alignItems: 'center',
+    },
+    retakeButtonText: {
+        color: '#FFF',
+        fontSize: 18,
+        fontWeight: '600',
+    },
+    homeButton: {
+        backgroundColor: '#A8DADC',
+        paddingVertical: 15,
+        paddingHorizontal: 40,
+        borderRadius: 10,
+        marginTop: 15,
+        width: '100%',
+        alignItems: 'center',
+    },
+    homeButtonText: {
+        color: '#1D3557',
+        fontSize: 18,
+        fontWeight: '600',
+    },
+    moreInfoButton: {
+        backgroundColor: '#1D3557',
+        paddingVertical: 15,
+        paddingHorizontal: 40,
+        borderRadius: 10,
+        marginTop: 15,
+        width: '100%',
+        alignItems: 'center',
+    },
+    moreInfoButtonText: {
+        color: '#FFF',
+        fontSize: 18,
+        fontWeight: '600',
     },
     navigationButtons: {
         flexDirection: 'row',

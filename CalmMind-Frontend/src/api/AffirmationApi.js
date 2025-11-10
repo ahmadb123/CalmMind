@@ -21,3 +21,25 @@ export async function fetchRandomAffirmation(){
         throw new Error(error.message || 'Failed to fetch affirmation');
     }
 };
+
+
+export async function fetchRandomAffirmationPerStyle(style){
+    try{
+        const response = await fetch(`${API_URL}/api/affirmations/random/${style}`, {
+            method: 'GET',
+            headers:{
+                'Content-Type': 'application/json',
+            },
+        });
+        if(response.ok){
+            const data = await response.json();
+            return data;
+        }
+        else{
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to fetch affirmation');
+        }
+    }catch(error){
+        throw new Error(error.message || 'Failed to fetch affirmation');
+    }
+};

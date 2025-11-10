@@ -1,6 +1,7 @@
 package com.calmmind.backend.controller;
 
 import com.calmmind.backend.service.IQuizService;
+import com.calmmind.backend.dto.QuizResultDTO;
 import com.calmmind.backend.model.QuizQuestion;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -47,6 +48,22 @@ public class QuizController {
         } catch (Exception e){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("Error submitting quiz: " + e.getMessage());
+        }
+    }
+    /** GET QUIZ RESULTS */
+    @GetMapping("/result/{userId}")
+    public ResponseEntity<?> getQuizResults(@PathVariable Long userId){
+        try{
+            if(userId == null){
+                return ResponseEntity.badRequest().body("Invalid user ID");
+            }
+            QuizResultDTO result = quizService.getQuizResult(userId);
+            return ResponseEntity.ok(result);
+        }catch(IllegalArgumentException e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Error retrieving quiz results: " + e.getMessage());
         }
     }
 }

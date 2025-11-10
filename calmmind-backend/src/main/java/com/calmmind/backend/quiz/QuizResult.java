@@ -2,7 +2,6 @@ package com.calmmind.backend.quiz;
 
 import com.calmmind.backend.model.AttachmentStyle;
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
 
 /*
  * Entity representing a quiz result.
@@ -17,6 +16,8 @@ public class QuizResult extends Quiz {
      */
     private Double anxietyScore;
     private Double avoidanceScore;
+    @Enumerated(EnumType.STRING)  // This saves "ANXIOUS" instead of 0
+    @Column(name = "attachment_style", nullable = false, length = 50)
     private AttachmentStyle attachmentStyle;
 
     public QuizResult(){}
@@ -51,6 +52,7 @@ public class QuizResult extends Quiz {
     public void setAttachmentStyle(AttachmentStyle attachmentStyle) {
         this.attachmentStyle = attachmentStyle;
     }
+
 
     /*
      * Validation Rules:

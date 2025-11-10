@@ -12,6 +12,7 @@
 /Users/ahmadbishara/Desktop/CalmMind/CalmMind-Backend/src/main/java/com/calmmind/backend/repository/UserRepository.java
 /Users/ahmadbishara/Desktop/CalmMind/CalmMind-Backend/src/main/java/com/calmmind/backend/controller/UserController.java
 /Users/ahmadbishara/Desktop/CalmMind/CalmMind-Backend/src/main/java/com/calmmind/backend/model/QuizDimension.java
+/Users/ahmadbishara/Desktop/CalmMind/CalmMind-Backend/src/main/java/com/calmmind/backend/dto/QuizResultDTO.java
 /Users/ahmadbishara/Desktop/CalmMind/CalmMind-Backend/src/main/java/com/calmmind/backend/quiz/strategy/ScoringStrategy.java
 /Users/ahmadbishara/Desktop/CalmMind/CalmMind-Backend/src/main/java/com/calmmind/backend/quiz/QuizResult.java
 /Users/ahmadbishara/Desktop/CalmMind/CalmMind-Backend/src/main/java/com/calmmind/backend/dto/RegisterRequest.java

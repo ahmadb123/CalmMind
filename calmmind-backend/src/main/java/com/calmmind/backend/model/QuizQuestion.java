@@ -1,5 +1,4 @@
 package com.calmmind.backend.model;
-import com.calmmind.backend.model.QuizDimension;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 

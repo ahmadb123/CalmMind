@@ -1,7 +1,6 @@
 package com.calmmind.backend.quiz;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
 
 /*
  * Entity representing a quiz response.

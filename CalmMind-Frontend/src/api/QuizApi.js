@@ -43,3 +43,24 @@ export async function submitQuiz(userId, answers){
         throw new Error(error.message || 'Failed to submit quiz');
     }
 };
+
+export async function fetchQuizResults(userId){
+    try{
+        const response = await fetch(`${API_URL}/api/quiz/result/${userId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+        if(response.ok){
+            const data = await response.json();
+            return data;
+        }
+        else{
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to fetch quiz results');
+        }
+    }catch(error){
+        throw new Error(error.message || 'Failed to fetch quiz results');
+    }
+};

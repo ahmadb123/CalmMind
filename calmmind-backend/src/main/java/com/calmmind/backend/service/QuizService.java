@@ -3,6 +3,7 @@ import java.util.List;
 import java.util.Map;
 import com.calmmind.backend.model.QuizQuestion;
 import com.calmmind.backend.model.User;
+import com.calmmind.backend.dto.QuizResultDTO;
 import com.calmmind.backend.model.AttachmentStyle;
 import com.calmmind.backend.quiz.QuizResponse;
 import com.calmmind.backend.quiz.QuizResult;
@@ -11,6 +12,8 @@ import com.calmmind.backend.repository.QuizResultRepository;
 import com.calmmind.backend.repository.QuizQuestionRepository;
 import com.calmmind.backend.repository.UserRepository;
 import com.calmmind.backend.repository.QuizResponseRepository;
+import com.calmmind.backend.service.IQuizService;
+import com.calmmind.backend.dto.QuizResultDTO;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -48,7 +51,7 @@ public class QuizService implements IQuizService {
      * output: quiz submitted to database and result calculated
      */
     @Override 
-    public QuizResult submitQuiz(Long userId, Map<Integer,Integer> answers){
+    public QuizResultDTO submitQuiz(Long userId, Map<Integer,Integer> answers){
         // few things to check
         // 1. validate user exists
         userRepository.findById(userId)
@@ -79,18 +82,30 @@ public class QuizService implements IQuizService {
         user.setAttachmentStyle(result.getAttachmentStyle());
         userRepository.save(user);
 
-        return result;
-    }
+        return new QuizResultDTO(
+            result.getUserId(),
+            result.getAttachmentStyle(),
+            result.getAnxietyScore(),
+            result.getAvoidanceScore()
+        );
+        }
 
     @Override 
-    public QuizResult getQuizResult(Long userId){
+    public QuizResultDTO getQuizResult(Long userId){
         // user might have multiple results?
         List<QuizResult> results = quizResultRepository.findByUserId(userId);
         if(results.isEmpty()){
             throw new IllegalArgumentException("Quiz result not found for user");
         }
-        // return latest result
-        return results.get(results.size() - 1);
+        // get latest result
+        QuizResult result = results.get(results.size() - 1);
+        return new QuizResultDTO(
+            result.getUserId(),
+            result.getAttachmentStyle(),
+            result.getAnxietyScore(),
+            result.getAvoidanceScore()
+        );
+       
     }
 
     @Override 

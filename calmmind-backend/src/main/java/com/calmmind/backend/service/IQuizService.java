@@ -1,5 +1,6 @@
 package com.calmmind.backend.service;
 import com.calmmind.backend.quiz.QuizResult;
+import com.calmmind.backend.dto.QuizResultDTO;
 import com.calmmind.backend.model.QuizQuestion;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +20,7 @@ public interface IQuizService{
         *                  Example: {1: 5, 2: 6, ..., 12: 4}
         * @return QuizResult with calculated scores and attachment style
     */   
-    QuizResult submitQuiz(Long userId, Map<Integer,Integer> answers);
+    QuizResultDTO submitQuiz(Long userId, Map<Integer,Integer> answers);
     /**
      * Get user's quiz result
      * Called when: User views results or homepage needs attachment style
@@ -27,7 +28,7 @@ public interface IQuizService{
      * @param userId - User ID
      * @return QuizResult or throws exception if not found
     */
-    QuizResult getQuizResult(Long userId);
+    QuizResultDTO getQuizResult(Long userId);
     // did user take quiz?
     boolean hasUserTakenQuiz(Long userId);
     // delete if user wants to retake 

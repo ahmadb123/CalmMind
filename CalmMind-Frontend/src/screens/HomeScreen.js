@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';  // ← Add useState
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,25 +8,49 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { fetchRandomAffirmation } from '../api/AffirmationApi';  // ← Fixed typo
+import { fetchRandomAffirmation, fetchRandomAffirmationPerStyle } from '../api/AffirmationApi';
 
 function HomeScreen({ route, navigation }) {
   const { user } = route.params || {};
   
-  // ← ADD THIS STATE
   const [affirmation, setAffirmation] = useState("You are worthy of love and belonging.");
   const [loading, setLoading] = useState(false);
+  const usersStyle = user?.attachmentStyle || null;
 
   useEffect(() => {
-    loadAffirmation();
+    console.log("User's attachment style:", usersStyle); // Only logs once on mount
+    loadCurrentAffirmation();
   }, []);
+
+  // ✅ Smart function that picks the right affirmation loader
+  const loadCurrentAffirmation = () => {
+    if (usersStyle) {
+      loadAffirmationPerStyle(usersStyle);
+    } else {
+      loadAffirmation();
+    }
+  };
 
   const loadAffirmation = async () => {
     setLoading(true);
     
     try {
       const data = await fetchRandomAffirmation();
-      setAffirmation(data.message);  // ← UPDATE STATE HERE
+      setAffirmation(data.message);
+    } catch (error) {
+      console.error('Error fetching affirmation:', error);
+      setAffirmation("You are worthy of love and belonging.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadAffirmationPerStyle = async (style) => {
+    setLoading(true);
+    
+    try {
+      const data = await fetchRandomAffirmationPerStyle(style);
+      setAffirmation(data.message);
     } catch (error) {
       console.error('Error fetching affirmation:', error);
       setAffirmation("You are worthy of love and belonging.");
@@ -56,7 +80,9 @@ function HomeScreen({ route, navigation }) {
         <View style={styles.content}>
           {/* DAILY AFFIRMATION CARD */}
           <View style={styles.card}>
-            <Text style={styles.cardTitle}>Daily Affirmation 🌿</Text>
+            <Text style={styles.cardTitle}>
+              {usersStyle ? `${usersStyle} Affirmation 🌿` : 'Daily Affirmation 🌿'}
+            </Text>
             
             {loading ? (
               <ActivityIndicator size="large" color="#A8DADC" style={{ marginVertical: 20 }} />
@@ -66,7 +92,7 @@ function HomeScreen({ route, navigation }) {
             
             <TouchableOpacity
               style={styles.refreshButton}
-              onPress={loadAffirmation}  // ← Just pass function reference
+              onPress={loadCurrentAffirmation}  // ✅ Now uses the smart function
               disabled={loading}
             >
               <Text style={styles.refreshText}>
@@ -75,21 +101,38 @@ function HomeScreen({ route, navigation }) {
             </TouchableOpacity>
           </View>
 
-          {/* Quiz Card */}
-          <TouchableOpacity 
-            style={styles.quizCard}
-            onPress={() => navigation.navigate('Quiz', { user })}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.quizIcon}>❓</Text>
-            <Text style={styles.quizQuestion}>Don't know your style?</Text>
-            <Text style={styles.quizTitle}>📋 Take the Quiz</Text>
-            <Text style={styles.quizSubtitle}>Discover your attachment pattern</Text>
-            <View style={styles.quizButton}>
-              <Text style={styles.quizButtonText}>Start Quiz →</Text>
-            </View>
+          {/* Quiz Card - Only show if user hasn't taken quiz */}
+          {!usersStyle && (
+            <TouchableOpacity 
+              style={styles.quizCard}
+              onPress={() => navigation.navigate('Quiz', { user })}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.quizIcon}>❓</Text>
+              <Text style={styles.quizQuestion}>Don't know your style?</Text>
+              <Text style={styles.quizTitle}>📋 Take the Quiz</Text>
+              <Text style={styles.quizSubtitle}>Discover your attachment pattern</Text>
+              <View style={styles.quizButton}>
+                <Text style={styles.quizButtonText}>Start Quiz →</Text>
+              </View>
+            </TouchableOpacity>
+          )}
 
-          </TouchableOpacity>
+          {/* Show Attachment Style Card if user has taken quiz */}
+          {usersStyle && (
+            <TouchableOpacity 
+              style={styles.styleCard}
+              onPress={() => navigation.navigate('Quiz', { user })}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.styleIcon}>✨</Text>
+              <Text style={styles.styleTitle}>Your Attachment Style</Text>
+              <Text style={styles.styleValue}>{usersStyle.replace('_', ' ')}</Text>
+              <View style={styles.styleButton}>
+                <Text style={styles.styleButtonText}>View Details →</Text>
+              </View>
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* Quick Help */}
@@ -212,8 +255,8 @@ const styles = StyleSheet.create({
     color: '#333',
     fontWeight: '600',
   },
-    quizCard: {
-    backgroundColor: '#E8D5E8',  // Light lavender
+  quizCard: {
+    backgroundColor: '#E8D5E8',
     borderRadius: 15,
     padding: 25,
     marginBottom: 20,
@@ -266,7 +309,56 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#333',
   },
-   quickHelpTitle: {
+  // ✅ New styles for attachment style card
+  styleCard: {
+    backgroundColor: '#D4F1F4',
+    borderRadius: 15,
+    padding: 25,
+    marginBottom: 20,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
+    elevation: 4,
+    borderWidth: 2,
+    borderColor: '#A8DADC',
+  },
+  styleIcon: {
+    fontSize: 48,
+    marginBottom: 12,
+  },
+  styleTitle: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  styleValue: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#1D3557',
+    textAlign: 'center',
+    marginBottom: 20,
+    textTransform: 'capitalize',
+  },
+  styleButton: {
+    backgroundColor: '#457B9D',
+    paddingHorizontal: 30,
+    paddingVertical: 14,
+    borderRadius: 25,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  styleButtonText: {
+    fontSize: 17,
+    fontWeight: '600',
+    color: '#FFF',
+  },
+  quickHelpTitle: {
     fontSize: 22,
     fontWeight: 'bold',
     color: '#333',
@@ -278,6 +370,7 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'space-between',
     marginBottom: 20,
+    paddingHorizontal: 20,
   },
   quickHelpBox: {
     width: '48%',
