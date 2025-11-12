@@ -6,7 +6,9 @@ import RegisterScreen from './src/screens//RegisterScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import SettingsScreen from './src/screens/SettingScreen';
 import QuizScreen from './src/screens/QuizScreen';
-import AttachmentInfoScreen from './src/screens/AttachmentInfoScreen';
+import AnxietyReliefScreen from './src/screens/AnxietyReliefScreen';
+import ToolDetailScreen from './src/screens/ToolDetailScreen';
+import MyStyleScreen from './src/screens/MyStyleScreen';
 const Stack = createNativeStackNavigator();
 
 function App(){
@@ -39,8 +41,18 @@ function App(){
           options={{headerShown: false}}
         />
         <Stack.Screen 
-          name="AttachmentInfo"
-          component={AttachmentInfoScreen}
+          name="MyStyleScreen"
+          component={MyStyleScreen}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="AnxietyRelief"
+          component={AnxietyReliefScreen}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="ToolDetail"
+          component={ToolDetailScreen}
           options={{headerShown: false}}
         />
       </Stack.Navigator>

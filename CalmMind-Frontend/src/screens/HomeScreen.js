@@ -79,28 +79,35 @@ function HomeScreen({ route, navigation }) {
         {/* Content */}
         <View style={styles.content}>
           {/* DAILY AFFIRMATION CARD */}
-          <View style={styles.card}>
-            <Text style={styles.cardTitle}>
-              {usersStyle ? `${usersStyle} Affirmation 🌿` : 'Daily Affirmation 🌿'}
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Daily Affirmation 🌿</Text>
+          
+          {/* Affirmation with overlay loading */}
+          <View style={styles.affirmationContainer}>
+            <Text style={[
+              styles.affirmation,
+              loading && { opacity: 0.3 }  // Fade when loading
+            ]}>
+              "{affirmation}"
             </Text>
             
-            {loading ? (
-              <ActivityIndicator size="large" color="#A8DADC" style={{ marginVertical: 20 }} />
-            ) : (
-              <Text style={styles.affirmation}>"{affirmation}"</Text>
+            {loading && (
+              <View style={styles.loadingOverlay}>
+                <ActivityIndicator size="small" color="#A8DADC" />
+              </View>
             )}
-            
-            <TouchableOpacity
-              style={styles.refreshButton}
-              onPress={loadCurrentAffirmation}  // ✅ Now uses the smart function
-              disabled={loading}
-            >
-              <Text style={styles.refreshText}>
-                {loading ? 'Loading...' : '🔄 New Affirmation'}
-              </Text>
-            </TouchableOpacity>
           </View>
 
+          <TouchableOpacity 
+            style={styles.refreshButton} 
+            onPress={loadAffirmation}
+            disabled={loading}
+          >
+            <Text style={styles.refreshText}>
+              {loading ? 'Loading...' : '🔄 New Affirmation'}
+            </Text>
+          </TouchableOpacity>
+        </View>
           {/* Quiz Card - Only show if user hasn't taken quiz */}
           {!usersStyle && (
             <TouchableOpacity 
@@ -143,7 +150,7 @@ function HomeScreen({ route, navigation }) {
         <View style={styles.quickHelpGrid}>
           <TouchableOpacity
             style={[styles.quickHelpBox, styles.anxietyBox]}
-            onPress={() => alert('Anxiety Relief - Coming Soon')}
+            onPress={() => navigation.navigate('AnxietyRelief', { user: user })}
           >
             <Text style={styles.quickHelpIcon}>💭</Text>
             <Text style={styles.quickHelpText}>Anxiety Relief</Text>
@@ -159,7 +166,7 @@ function HomeScreen({ route, navigation }) {
 
           <TouchableOpacity
             style={[styles.quickHelpBox, styles.styleBox]}
-            onPress={() => alert('Understand My Style - Coming Soon')}
+            onPress={() => navigation.navigate('MyStyleScreen', { user: user })}
           >
             <Text style={styles.quickHelpIcon}>🔍</Text>
             <Text style={styles.quickHelpText}>My Style</Text>
@@ -209,6 +216,18 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     marginTop: 4,
+  },
+  affirmationContainer: {
+  minHeight: 100,
+  justifyContent: 'center',
+  alignItems: 'center',
+  marginVertical: 20,
+  position: 'relative',
+  },
+  loadingOverlay: {
+    position: 'absolute',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   settingsButton: {
     padding: 8,

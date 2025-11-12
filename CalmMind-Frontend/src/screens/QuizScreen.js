@@ -193,15 +193,7 @@ function QuizScreen({ route, navigation }) {
                     >
                         <Text style={styles.homeButtonText}>Go to Home</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity
-                        style={styles.moreInfoButton}
-                        onPress={() => navigation.navigate('AttachmentInfo', {
-                            user: user, 
-                            quizResults: quizResults
-                        })}
-                    >
-                        <Text style={styles.moreInfoButtonText}>Learn About Your Attachment Style</Text>
-                    </TouchableOpacity>
+                    
                 </ScrollView>
             </SafeAreaView>
         );
@@ -363,20 +355,6 @@ const styles = StyleSheet.create({
     },
     homeButtonText: {
         color: '#1D3557',
-        fontSize: 18,
-        fontWeight: '600',
-    },
-    moreInfoButton: {
-        backgroundColor: '#1D3557',
-        paddingVertical: 15,
-        paddingHorizontal: 40,
-        borderRadius: 10,
-        marginTop: 15,
-        width: '100%',
-        alignItems: 'center',
-    },
-    moreInfoButtonText: {
-        color: '#FFF',
         fontSize: 18,
         fontWeight: '600',
     },
