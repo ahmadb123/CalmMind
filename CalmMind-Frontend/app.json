@@ -13,7 +13,8 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.ahmadb123hazemb.CalmMind"
     },
     "android": {
       "adaptiveIcon": {
@@ -21,13 +22,22 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.ahmadb123hazemb.CalmMind"
+      "package": "com.ahmadb123hazemb.CalmMind",
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
       "expo-audio"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "83900e45-4962-4321-b5bb-25cd0fdd5aa4"
+      }
+    }
   }
 }

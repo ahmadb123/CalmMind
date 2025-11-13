@@ -25,6 +25,8 @@ function HomeScreen({ route, navigation }) {
   // ✅ Smart function that picks the right affirmation loader
   const loadCurrentAffirmation = () => {
     if (usersStyle) {
+      // debugger; print usersStyle
+      console.log("Loading affirmation for style:", usersStyle);
       loadAffirmationPerStyle(usersStyle);
     } else {
       loadAffirmation();
@@ -100,7 +102,7 @@ function HomeScreen({ route, navigation }) {
 
           <TouchableOpacity 
             style={styles.refreshButton} 
-            onPress={loadAffirmation}
+            onPress={loadCurrentAffirmation}
             disabled={loading}
           >
             <Text style={styles.refreshText}>

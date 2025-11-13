@@ -7,6 +7,7 @@ import com.calmmind.backend.service.IUserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.Collections;
 @RestController 
 @RequestMapping("/api/users")
 @CrossOrigin(origins = "*")
@@ -42,7 +43,8 @@ public class UserController {
             );
             return ResponseEntity.ok(user);
         } catch (Exception e){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(Collections.singletonMap("message", e.getMessage()));
         }
     }
 

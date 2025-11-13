@@ -43,6 +43,8 @@ public class UserService implements IUserService {
             throw new IllegalArgumentException("Invalid username or password");
         }
         if(user.getPassword().equals(password)){
+            System.out.println("DB Password: '" + user.getPassword() + "'");
+            System.out.println("Entered Password: '" + password + "'");
             return user;
         } else {
             throw new IllegalArgumentException("Invalid username or password");
@@ -63,6 +65,7 @@ public class UserService implements IUserService {
         return !userRepo.existsByUsername(username);
     }
     @Override 
+    // deleting user should delete all related data (quiz results, responses, affirmations, etc.)
     public void deleteUser(Long id){
         userRepo.deleteById(id);
     }

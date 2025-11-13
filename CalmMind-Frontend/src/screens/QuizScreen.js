@@ -6,7 +6,7 @@ import {
   Alert, 
   StyleSheet, 
   TouchableOpacity,
-    ScrollView
+  ScrollView
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ProgressBar from '../components/ProgressBar';
@@ -26,11 +26,9 @@ function QuizScreen({ route, navigation }) {
     const [quizLoading, setQuizLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
     
-    const[hasResults, setHasResults] = useState(false);
-    const[quizResults, setQuizResults] = useState(null);
-    const[showingQuiz, setShowingQuiz] = useState(true);
-    // Fetch quiz questions on mount 
-    // check if user has already taken the quiz 
+    const [hasResults, setHasResults] = useState(false);
+    const [quizResults, setQuizResults] = useState(null);
+    const [showingQuiz, setShowingQuiz] = useState(true);
 
     useEffect(() => {
         const checkQuizStatus = async () => {
@@ -42,7 +40,8 @@ function QuizScreen({ route, navigation }) {
             setQuizLoading(true);
             try{
                 const results = await fetchQuizResults(user.id);
-                if(results && results.attachmentStyle){
+                // ✅ UPDATED: Check for primaryStyle instead of attachmentStyle
+                if(results && results.primaryStyle){
                     setHasResults(true);
                     setQuizResults(results);
                     setShowingQuiz(false);
@@ -59,7 +58,6 @@ function QuizScreen({ route, navigation }) {
         checkQuizStatus();
     }, []);
 
-
     const loadQuiz = async () => {
         try {
             const fetchedQuestions = await fetchQuiz();
@@ -73,7 +71,6 @@ function QuizScreen({ route, navigation }) {
         }
     };
 
-    // handle retake quiz:
     const handleRetakeQuiz = async () => {
         Alert.alert('Retake Quiz', 'Are you sure you want to retake the quiz?', [
             {
@@ -94,26 +91,22 @@ function QuizScreen({ route, navigation }) {
         ]);
     };
 
-    // Handle answer selection
     const handleAnswer = (questionId, answerValue) => {
         setAnswers({ ...answers, [questionId]: answerValue });
     };
 
-    // Go to next question
     const handleNext = () => {
         if (currentQuestionIndex < quizQuestions.length - 1) {
             setCurrentQuestionIndex(currentQuestionIndex + 1);
         }
     };
 
-    // Go to previous question
     const handlePrevious = () => {
         if (currentQuestionIndex > 0) {
             setCurrentQuestionIndex(currentQuestionIndex - 1);
         }
     };
 
-    // Submit quiz
     const handleSubmit = async () => {
         if (Object.keys(answers).length < quizQuestions.length) {
             Alert.alert('Incomplete', 'Please answer all questions before submitting.');
@@ -128,7 +121,10 @@ function QuizScreen({ route, navigation }) {
             Alert.alert('Success!', 'Quiz submitted successfully!', [
                 {
                     text: 'View Results',
-                    onPress: () => navigation.navigate('Home', { user: { ...user, attachmentStyle: result.attachmentStyle } })
+                    // ✅ UPDATED: Use primaryStyle
+                    onPress: () => navigation.navigate('Home', { 
+                        user: { ...user, attachmentStyle: result.primaryStyle } 
+                    })
                 }
             ]);
         } catch (error) {
@@ -139,7 +135,6 @@ function QuizScreen({ route, navigation }) {
         }
     };
 
-    // Loading state
     if (quizLoading) {
         return (
             <SafeAreaView style={styles.safeArea}>
@@ -151,44 +146,104 @@ function QuizScreen({ route, navigation }) {
         );
     }
 
-      if(hasResults && !showingQuiz && quizResults){
+    // ✅ UPDATED: Enhanced results display with new fields
+    if(hasResults && !showingQuiz && quizResults){
         return (
             <SafeAreaView style={styles.safeArea}>
                 <ScrollView contentContainerStyle={styles.resultsContainer}>
                     <Text style={styles.resultsTitle}>Your Quiz Results</Text>
                     
+                    {/* Primary Attachment Style */}
                     <View style={styles.resultCard}>
-                        <Text style={styles.resultLabel}>Attachment Style</Text>
+                        <Text style={styles.resultLabel}>Primary Attachment Style</Text>
                         <Text style={styles.resultValue}>
-                            {quizResults.attachmentStyle.replace('_', ' ')}
+                            {quizResults.primaryStyle?.replace('_', ' ') || 'N/A'}
                         </Text>
+                        {quizResults.primaryDescription && (
+                            <Text style={styles.resultDescription}>
+                                {quizResults.primaryDescription}
+                            </Text>
+                        )}
                     </View>
 
+                    {/* ✅ NEW: Secondary Style (if exists) */}
+                    {quizResults.secondaryStyle && (
+                        <View style={[styles.resultCard, styles.secondaryCard]}>
+                            <Text style={styles.resultLabel}>Secondary Tendency</Text>
+                            <Text style={styles.secondaryValue}>
+                                {quizResults.secondaryStyle.replace('_', ' ')}
+                            </Text>
+                            {quizResults.secondaryDescription && (
+                                <Text style={styles.resultDescription}>
+                                    {quizResults.secondaryDescription}
+                                </Text>
+                            )}
+                        </View>
+                    )}
+
+                    {/* ✅ NEW: Confidence Indicator */}
                     <View style={styles.resultCard}>
-                        <Text style={styles.resultLabel}>Anxiety Score</Text>
-                        <Text style={styles.resultValue}>
-                            {quizResults.anxietyScore?.toFixed(2) || 'N/A'}
-                        </Text>
+                        <Text style={styles.resultLabel}>Classification Confidence</Text>
+                        <View style={styles.confidenceContainer}>
+                            <View style={styles.confidenceBarBackground}>
+                                <View 
+                                    style={[
+                                        styles.confidenceBarFill, 
+                                        { 
+                                            width: `${quizResults.confidence || 0}%`,
+                                            backgroundColor: 
+                                                quizResults.confidence >= 85 ? '#2E7D32' :
+                                                quizResults.confidence >= 70 ? '#FFA726' :
+                                                '#FF6B6B'
+                                        }
+                                    ]} 
+                                />
+                            </View>
+                            <Text style={styles.confidenceText}>
+                                {Math.round(quizResults.confidence || 0)}%
+                            </Text>
+                        </View>
+                        
+                        {/* ✅ NEW: Borderline warning */}
+                        {quizResults.isBorderline && (
+                            <View style={styles.borderlineWarning}>
+                                <Text style={styles.borderlineIcon}>⚠️</Text>
+                                <Text style={styles.borderlineText}>
+                                    Your results are borderline. Consider retaking the quiz for more clarity.
+                                </Text>
+                            </View>
+                        )}
                     </View>
 
-                    <View style={styles.resultCard}>
-                        <Text style={styles.resultLabel}>Avoidance Score</Text>
-                        <Text style={styles.resultValue}>
-                            {quizResults.avoidanceScore?.toFixed(2) || 'N/A'}
-                        </Text>
+                    {/* Dimensional Scores */}
+                    <View style={styles.scoresRow}>
+                        <View style={styles.scoreCard}>
+                            <Text style={styles.scoreLabel}>Anxiety</Text>
+                            <Text style={styles.scoreValue}>
+                                {quizResults.anxietyScore?.toFixed(1) || 'N/A'}/7
+                            </Text>
+                        </View>
+
+                        <View style={styles.scoreCard}>
+                            <Text style={styles.scoreLabel}>Avoidance</Text>
+                            <Text style={styles.scoreValue}>
+                                {quizResults.avoidanceScore?.toFixed(1) || 'N/A'}/7
+                            </Text>
+                        </View>
                     </View>
 
+                    {/* Action Buttons */}
                     <TouchableOpacity
                         style={styles.retakeButton}
                         onPress={handleRetakeQuiz}
                     >
-                        <Text style={styles.retakeButtonText}>Retake Quiz</Text>
+                        <Text style={styles.retakeButtonText}>🔄 Retake Quiz</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity
                         style={styles.homeButton}
                         onPress={() => navigation.navigate('Home', { 
-                            user: { ...user, attachmentStyle: quizResults.attachmentStyle } 
+                            user: { ...user, attachmentStyle: quizResults.primaryStyle } 
                         })}
                     >
                         <Text style={styles.homeButtonText}>Go to Home</Text>
@@ -214,7 +269,6 @@ function QuizScreen({ route, navigation }) {
             </SafeAreaView>
         );
     }
-  
 
     const currentQuestion = quizQuestions[currentQuestionIndex];
     const isFirstQuestion = currentQuestionIndex === 0;
@@ -270,7 +324,6 @@ function QuizScreen({ route, navigation }) {
                         </TouchableOpacity>
                     )}
                     
-                    
                 </View>
             </View>
         </SafeAreaView>
@@ -319,16 +372,111 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
         elevation: 3,
     },
+    // ✅ NEW: Secondary style card styling
+    secondaryCard: {
+        backgroundColor: '#F3E5F5',
+        borderWidth: 2,
+        borderColor: '#AB47BC',
+    },
     resultLabel: {
         fontSize: 14,
         color: '#666',
         marginBottom: 5,
+        fontWeight: '500',
     },
     resultValue: {
         fontSize: 24,
         fontWeight: 'bold',
         color: '#1D3557',
         textTransform: 'capitalize',
+        marginBottom: 10,
+    },
+    // ✅ NEW: Secondary value styling
+    secondaryValue: {
+        fontSize: 20,
+        fontWeight: '600',
+        color: '#AB47BC',
+        textTransform: 'capitalize',
+        marginBottom: 10,
+    },
+    // ✅ NEW: Description text
+    resultDescription: {
+        fontSize: 14,
+        color: '#555',
+        lineHeight: 20,
+        marginTop: 8,
+        fontStyle: 'italic',
+    },
+    // ✅ NEW: Confidence display
+    confidenceContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 10,
+    },
+    confidenceBarBackground: {
+        flex: 1,
+        height: 24,
+        backgroundColor: '#E0E0E0',
+        borderRadius: 12,
+        overflow: 'hidden',
+        marginRight: 15,
+    },
+    confidenceBarFill: {
+        height: '100%',
+        borderRadius: 12,
+    },
+    confidenceText: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#1D3557',
+        minWidth: 50,
+    },
+    // ✅ NEW: Borderline warning
+    borderlineWarning: {
+        flexDirection: 'row',
+        backgroundColor: '#FFF3E0',
+        padding: 12,
+        borderRadius: 8,
+        marginTop: 12,
+        alignItems: 'center',
+        borderLeftWidth: 4,
+        borderLeftColor: '#FF6B6B',
+    },
+    borderlineIcon: {
+        fontSize: 20,
+        marginRight: 10,
+    },
+    borderlineText: {
+        flex: 1,
+        fontSize: 13,
+        color: '#666',
+        lineHeight: 18,
+    },
+    // ✅ NEW: Dimensional scores side-by-side
+    scoresRow: {
+        flexDirection: 'row',
+        width: '100%',
+        justifyContent: 'space-between',
+        marginBottom: 15,
+    },
+    scoreCard: {
+        backgroundColor: '#E3F2FD',
+        width: '48%',
+        padding: 15,
+        borderRadius: 12,
+        alignItems: 'center',
+        borderWidth: 2,
+        borderColor: '#42A5F5',
+    },
+    scoreLabel: {
+        fontSize: 14,
+        color: '#666',
+        marginBottom: 5,
+    },
+    scoreValue: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#1D3557',
     },
     retakeButton: {
         backgroundColor: '#457B9D',

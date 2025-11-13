@@ -2,110 +2,187 @@ package com.calmmind.backend.quiz;
 
 import com.calmmind.backend.model.AttachmentStyle;
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 
-/*
- * Entity representing a quiz result.
+/**
+ * Entity representing a quiz result with enhanced classification.
  */
 @Entity
 @Table(name = "quiz_results")
 public class QuizResult extends Quiz {
-    /*
-     *  anxietyScore (own field - must be 1.0-7.0)
-        - avoidanceScore (own field - must be 1.0-7.0)
-        - attachmentStyle (own field - must not be null)
-     */
-    private Double anxietyScore;
-    private Double avoidanceScore;
-    @Enumerated(EnumType.STRING)  // This saves "ANXIOUS" instead of 0
-    @Column(name = "attachment_style", nullable = false, length = 50)
-    private AttachmentStyle attachmentStyle;
-
-    public QuizResult(){}
     
-    public QuizResult(Long userId, Double anxietyScore, Double avoidanceScore, AttachmentStyle attachmentStyle){
+    @Column(nullable = false)
+    private Double anxietyScore;
+    
+    @Column(nullable = false)
+    private Double avoidanceScore;
+    
+    // ✅ Primary style - NOT NULL
+    @Enumerated(EnumType.STRING)
+    @Column(name = "primary_style", nullable = false, length = 50)
+    private AttachmentStyle primaryStyle;
+    
+    // ✅ Secondary style - NULLABLE (different column name!)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "secondary_style", length = 50)
+    private AttachmentStyle secondaryStyle;
+    
+    // ✅ Confidence score
+    @Column(nullable = false)
+    private Double confidence = 100.0;
+    @Column(nullable = false)
+    private Double insecurityIndex;
+    
+    // ✅ Timestamp
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    // ✅ Default constructor
+    public QuizResult() {}
+    
+    // ✅ Full constructor (fixed syntax)
+    public QuizResult(
+        Long userId, 
+        Double anxietyScore, 
+        Double avoidanceScore, 
+        AttachmentStyle primaryStyle,
+        AttachmentStyle secondaryStyle,
+        Double confidence,
+        Double insecurityIndex
+    ) {
         super(userId);
         this.anxietyScore = anxietyScore;
         this.avoidanceScore = avoidanceScore;
-        this.attachmentStyle = attachmentStyle;
+        this.primaryStyle = primaryStyle;
+        this.secondaryStyle = secondaryStyle;
+        this.confidence = confidence;
+        this.insecurityIndex = insecurityIndex;
+    }
+    
+    // ✅ Backward compatible constructor (fixed syntax)
+    public QuizResult(
+        Long userId, 
+        Double anxietyScore, 
+        Double avoidanceScore,
+        AttachmentStyle primaryStyle
+    ) {
+        this(userId, anxietyScore, avoidanceScore, primaryStyle, null, 100.0, 0.0);
     }
 
+    // ============= GETTERS AND SETTERS =============
+    
     public Double getAnxietyScore() {
         return anxietyScore;
     }
-
+    
     public void setAnxietyScore(Double anxietyScore) {
         this.anxietyScore = anxietyScore;
     }
-
+    
     public Double getAvoidanceScore() {
         return avoidanceScore;
     }
-
+    
     public void setAvoidanceScore(Double avoidanceScore) {
         this.avoidanceScore = avoidanceScore;
     }
-
-    public AttachmentStyle getAttachmentStyle() {
-        return attachmentStyle;
+    
+    public AttachmentStyle getPrimaryStyle() {
+        return primaryStyle;
+    }
+    
+    public void setPrimaryStyle(AttachmentStyle primaryStyle) {
+        this.primaryStyle = primaryStyle;
+    }
+    
+    public AttachmentStyle getSecondaryStyle() {
+        return secondaryStyle;
+    }
+    
+    public void setSecondaryStyle(AttachmentStyle secondaryStyle) {
+        this.secondaryStyle = secondaryStyle;
+    }
+    
+    public Double getConfidence() {
+        return confidence;
+    }
+    
+    public void setConfidence(Double confidence) {
+        this.confidence = confidence;
+    }
+    
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+    
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 
-    public void setAttachmentStyle(AttachmentStyle attachmentStyle) {
-        this.attachmentStyle = attachmentStyle;
+    public Double getInsecurityIndex() {
+        return insecurityIndex;
     }
 
-
-    /*
-     * Validation Rules:
-        Check 1: Anxiety score is valid
-
-        Must be between 1.0 and 7.0
-        Can't be negative, 0, or > 7
-
-        Check 2: Avoidance score is valid
-
-        Must be between 1.0 and 7.0
-
-        Check 3: Attachment style is not null
-
-        Must have a determined style
-
-        Check 4: Scores match style (optional - extra validation)
-
-        If style is SECURE, both scores should be < 3.5
-        If style is ANXIOUS, anxiety should be >= 3.5
+    public void setInsecurityIndex(Double insecurityIndex) {
+        this.insecurityIndex = insecurityIndex;
+    }
+    
+    // ============= HELPER METHODS =============
+    
+    /**
+     * Check if this is a borderline case (confidence < 75%)
      */
-    @Override 
-    public boolean validate(){
-        if(this.anxietyScore < 1.0 || this.anxietyScore > 7.0){
-            return false;
+    public boolean isBorderline() {
+        return confidence != null && confidence < 75.0;
+    }
+    
+    /**
+     * Check if there's a secondary style tendency
+     */
+    public boolean hasSecondaryStyle() {
+        return secondaryStyle != null;
+    }
+    
+    // ============= VALIDATION =============
+    
+    /**
+     * Validates that the quiz result is structurally valid.
+     * Uses NEW research-validated thresholds (4.2 / 2.9)
+     */
+    @Override
+    public boolean validate() {
+
+        // 1. Scores must be valid 1–7
+        if (anxietyScore == null || anxietyScore < 1.0 || anxietyScore > 7.0) return false;
+        if (avoidanceScore == null || avoidanceScore < 1.0 || avoidanceScore > 7.0) return false;
+
+        // 2. Primary style must exist
+        if (primaryStyle == null) return false;
+
+        // 3. Confidence must be 50–100
+        if (confidence == null || confidence < 50.0 || confidence > 100.0) return false;
+
+        // 4. Insecurity Index must be valid
+        if (insecurityIndex == null || insecurityIndex < 0.0 || insecurityIndex > 100.0) return false;
+
+        // 5. Secondary style may be null — no validation needed
+
+        return true; // ✔ structurally valid
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("QuizResult{");
+        sb.append("userId=").append(getUserId());
+        sb.append(", anxietyScore=").append(String.format("%.2f", anxietyScore));
+        sb.append(", avoidanceScore=").append(String.format("%.2f", avoidanceScore));
+        sb.append(", primaryStyle=").append(primaryStyle);
+        if (secondaryStyle != null) {
+            sb.append(", secondaryStyle=").append(secondaryStyle);
         }
-        if(this.avoidanceScore < 1.0 || this.avoidanceScore > 7.0){
-            return false;
-        }
-        if(this.attachmentStyle == null){
-            return false;
-        }
-        // Optional check
-        if(this.attachmentStyle == AttachmentStyle.SECURE){
-            if(this.anxietyScore >= 3.5 || this.avoidanceScore >= 3.5){
-                return false;
-            }
-        }
-        if(this.attachmentStyle == AttachmentStyle.ANXIOUS){
-            if(this.anxietyScore < 3.5){
-                return false;
-            }
-        }
-        if(this.attachmentStyle == AttachmentStyle.AVOIDANT){
-            if(this.avoidanceScore < 3.5){
-                return false;
-            }
-        }
-        if(this.attachmentStyle == AttachmentStyle.FEARFUL_AVOIDANT){
-            if(this.anxietyScore < 3.5 || this.avoidanceScore < 3.5){
-                return false;
-            }
-        }
-        return true;
+        sb.append(", confidence=").append(String.format("%.1f%%", confidence));
+        sb.append("}");
+        return sb.toString();
     }
 }

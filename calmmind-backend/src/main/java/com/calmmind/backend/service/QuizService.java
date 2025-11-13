@@ -56,10 +56,6 @@ public class QuizService implements IQuizService {
         // 1. validate user exists
         userRepository.findById(userId)
             .orElseThrow(() -> new IllegalArgumentException("User not found"));
-        // all questions answered?
-        if(answers.size() != 12){
-            throw new IllegalArgumentException("All 12 questions must be answered");
-        }
         // save each answer as QuizResponse
         for(Map.Entry<Integer,Integer> entry : answers.entrySet()){
             Integer questionId = entry.getKey();
@@ -79,16 +75,19 @@ public class QuizService implements IQuizService {
         quizResultRepository.save(result);
         // update user profile with attachment style
         User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
-        user.setAttachmentStyle(result.getAttachmentStyle());
+        user.setAttachmentStyle(result.getPrimaryStyle());
         userRepository.save(user);
 
         return new QuizResultDTO(
             result.getUserId(),
-            result.getAttachmentStyle(),
+            result.getPrimaryStyle(),
+            result.getSecondaryStyle(),      
             result.getAnxietyScore(),
-            result.getAvoidanceScore()
+            result.getAvoidanceScore(),
+            result.getConfidence(),          
+            result.isBorderline()            
         );
-        }
+    }
 
     @Override 
     public QuizResultDTO getQuizResult(Long userId){
@@ -101,9 +100,12 @@ public class QuizService implements IQuizService {
         QuizResult result = results.get(results.size() - 1);
         return new QuizResultDTO(
             result.getUserId(),
-            result.getAttachmentStyle(),
+            result.getPrimaryStyle(),
+            result.getSecondaryStyle(),
             result.getAnxietyScore(),
-            result.getAvoidanceScore()
+            result.getAvoidanceScore(),
+            result.getConfidence(),
+            result.isBorderline()
         );
        
     }

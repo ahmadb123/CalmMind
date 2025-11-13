@@ -50,18 +50,22 @@ public class QuizResponse extends Quiz {
         Check 3: QuestionId is valid (optional)
 
         QuestionId must be between 1-12
+
+        this checks one question answer at a time
      */
     @Override
     public boolean validate(){
-        if(this.questionAnswer < 1 || this.questionAnswer > 7){
+       if(this.questionAnswer == null){
+           return false;
+        }
+       if(this.questionAnswer < 1 || this.questionAnswer > 7){
+        return false;
+        }
+
+        if(this.questionId == null || this.questionId < 1 || this.questionId > 12){
             return false;
         }
-        if(this.questionAnswer == null){
-            return false;
-        }
-        if(this.questionId < 1 || this.questionId > 12){
-            return false;
-        }
+
         return true;
     }
 }

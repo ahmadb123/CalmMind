@@ -9,7 +9,7 @@ public class AvoidanceScoringStrategy implements ScoringStrategy {
      */
     @Override
     public double calculateScore(List<Integer> answers){
-        if(answers == null || answers.size() != 6){
+        if(answers == null || answers.size() != 6 || answers.isEmpty()){
             throw new IllegalArgumentException("Answers list must contain exactly 6 entries for avoidance dimension.");
         }
         // calculate sum then average
