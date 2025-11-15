@@ -6,9 +6,11 @@ import com.calmmind.backend.service.OpenAIService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.Map;
 import java.util.List;
 @RestController
 @RequestMapping("/api/openai")
+@CrossOrigin(origins = "*")
 public class OpenAIController {
     // service methods to interact with OpenAI API
     private final OpenAIService openAIService;
@@ -17,10 +19,14 @@ public class OpenAIController {
     }
 
     //** OPEN CHAT SEND REQUEST */
-    public ResponseEntity<?> requestChatGpt(@RequestBody String userMessage){
+    @PostMapping("/chat")
+    public ResponseEntity<?> requestChatGpt(@RequestBody  Map<String,String> payload){
         try{
-            if(userMessage.isEmpty()){
-                throw new IllegalArgumentException("Message cannot be empty");
+            String userMessage = payload.get("message");
+ 
+            if(userMessage == null || userMessage.trim().isEmpty()){
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "Message cannot be empty"));
             }
             RequestChatGPtDTO request = openAIService.createRequestDTO(userMessage);
             // Call OpenAI API and get response

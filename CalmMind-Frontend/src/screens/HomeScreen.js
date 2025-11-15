@@ -78,6 +78,36 @@ function HomeScreen({ route, navigation }) {
           </TouchableOpacity>
         </View>
 
+        {/* Navigation Bar */}
+        <View style={styles.navbar}>
+          <TouchableOpacity
+            style={styles.navItem}
+            onPress={() => navigation.navigate('RemindersAndNotes', { user })}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.navIcon}>📝</Text>
+            <Text style={styles.navText}>Notes</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity
+            style={styles.navItem}
+            onPress={() => navigation.navigate('RemindersAndNotes', { user })}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.navIcon}>🔔</Text>
+            <Text style={styles.navText}>Reminders</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity
+            style={styles.navItem}
+            onPress={() => navigation.navigate('AnxietyRelief', { user })}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.navIcon}>💭</Text>
+            <Text style={styles.navText}>Quick Help</Text>
+          </TouchableOpacity>
+        </View>
+
         {/* Content */}
         <View style={styles.content}>
           {/* DAILY AFFIRMATION CARD */}
@@ -160,7 +190,7 @@ function HomeScreen({ route, navigation }) {
 
           <TouchableOpacity
             style={[styles.quickHelpBox, styles.calmBox]}
-            onPress={() => alert('Calm Down - Coming Soon')}
+            onPress={() => navigation.navigate('CalmDown', { user: user })}
           >
             <Text style={styles.quickHelpIcon}>🧘‍♂️</Text>
             <Text style={styles.quickHelpText}>Calm Down</Text>
@@ -435,5 +465,39 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFE8E8',
     borderWidth: 2,
     borderColor: '#E91E63',
+  },
+  // Navbar styles
+  navbar: {
+    flexDirection: 'row',
+    backgroundColor: 'white',
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    marginHorizontal: 20,
+    marginTop: -10,
+    marginBottom: 20,
+    borderRadius: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    justifyContent: 'space-around',
+    alignItems: 'center',
+  },
+  navItem: {
+    alignItems: 'center',
+    flex: 1,
+    paddingVertical: 8,
+    borderRadius: 12,
+  },
+  navIcon: {
+    fontSize: 24,
+    marginBottom: 4,
+  },
+  navText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#457B9D',
+    textAlign: 'center',
   },
 });

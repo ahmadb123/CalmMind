@@ -9,6 +9,8 @@ import QuizScreen from './src/screens/QuizScreen';
 import AnxietyReliefScreen from './src/screens/AnxietyReliefScreen';
 import ToolDetailScreen from './src/screens/ToolDetailScreen';
 import MyStyleScreen from './src/screens/MyStyleScreen';
+import CalmDownScreen from './src/screens/CalmDownScreen';
+import RemindersAndNotesScreen from './src/screens/RemindersAndNotesScreen';
 const Stack = createNativeStackNavigator();
 
 function App(){
@@ -53,6 +55,16 @@ function App(){
         <Stack.Screen
           name="ToolDetail"
           component={ToolDetailScreen}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen 
+          name="CalmDown"
+          component={CalmDownScreen}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="RemindersAndNotes"
+          component={RemindersAndNotesScreen}
           options={{headerShown: false}}
         />
       </Stack.Navigator>

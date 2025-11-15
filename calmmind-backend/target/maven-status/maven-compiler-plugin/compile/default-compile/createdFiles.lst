@@ -1,3 +1,4 @@
+com/calmmind/backend/model/RemindersAndNotes$Timing.class
 com/calmmind/backend/repository/AnxietyReliefFeatureRepo/ToolUsageLogRepository.class
 com/calmmind/backend/quiz/QuizResponse.class
 com/calmmind/backend/quiz/calculator/AttachmentStyleCalculator$StyleResult.class
@@ -8,6 +9,7 @@ com/calmmind/backend/dto/AnxietyReliefFeatureDTO.class
 com/calmmind/backend/repository/AnxietyReliefFeatureRepo/AnxietyReliefFeatureRepository.class
 com/calmmind/backend/service/AffirmationService.class
 com/calmmind/backend/repository/QuizResultRepository.class
+com/calmmind/backend/controller/RemindersAndNotesController.class
 com/calmmind/backend/model/User.class
 com/calmmind/backend/config/DataInitializer.class
 com/calmmind/backend/service/QuizService.class
@@ -24,9 +26,12 @@ com/calmmind/backend/repository/AffirmationRepository.class
 com/calmmind/backend/repository/QuizQuestionRepository.class
 com/calmmind/backend/AnxietyFeature/AnxietyReliefAttachmentType.class
 com/calmmind/backend/dto/RequestChatGPtDTO$Message.class
+com/calmmind/backend/repository/RemindersAndNotesRepository.class
 com/calmmind/backend/quiz/AnxietyScoringStrategy.class
+com/calmmind/backend/model/RemindersAndNotes.class
 com/calmmind/backend/dto/RegisterRequest.class
 com/calmmind/backend/AnxietyFeature/AnxietyReliefFeatures.class
+com/calmmind/backend/service/IRemindersAndNotesService.class
 com/calmmind/backend/repository/QuizResponseRepository.class
 com/calmmind/backend/model/Affirmation.class
 com/calmmind/backend/quiz/AvoidanceScoringStrategy.class
@@ -40,10 +45,15 @@ com/calmmind/backend/service/IAnxietyReliefToolFeatureService.class
 com/calmmind/backend/model/AttachmentStyle.class
 com/calmmind/backend/CalmMindBackendApplication.class
 com/calmmind/backend/quiz/QuizResult.class
+com/calmmind/backend/model/RemindersAndNotes$WhenOptions.class
 com/calmmind/backend/dto/LoginRequest.class
 com/calmmind/backend/controller/AnxietyToolFeatureController.class
+com/calmmind/backend/model/RemindersAndNotes$FrequentAndTimingOptions.class
 com/calmmind/backend/service/AnxietyReliefToolFeatureService$1.class
+com/calmmind/backend/dto/ReminderSettingsDTO.class
 com/calmmind/backend/service/IUserService.class
+com/calmmind/backend/service/RemindersAndNotesService.class
 com/calmmind/backend/dto/RequestChatGPtDTO.class
 com/calmmind/backend/service/OpenAIService.class
+com/calmmind/backend/model/RemindersAndNotes$SetOptions.class
 com/calmmind/backend/service/IQuizService.class

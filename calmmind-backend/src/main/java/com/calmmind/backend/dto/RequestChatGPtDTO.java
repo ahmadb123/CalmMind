@@ -28,6 +28,7 @@ public class RequestChatGPtDTO{
         this.messages = messages;
     }
 
+    // inner class
     public static class Message{
         private String role;   // "user", "assistant", "system"
         private String content;

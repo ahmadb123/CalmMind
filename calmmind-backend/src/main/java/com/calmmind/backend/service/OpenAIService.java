@@ -8,15 +8,22 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 @Service 
 public class OpenAIService{
-    private static final String MODEL = "gpt-5-mini";
+    private static final String MODEL = "gpt-5-mini"; // model name
     private static final String OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
-    @Value("${openai.api.key}")
+    @Value("${OPENAI_API_KEY}")
     private String openAiApiKey;
-    private final OkHttpClient client = new OkHttpClient();
+    private final OkHttpClient client = new OkHttpClient.Builder()
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .writeTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(60, TimeUnit.SECONDS)  
+        .build();
     private final Gson gson = new Gson();
+
     public RequestChatGPtDTO createRequestDTO(String userMessage){
         List<RequestChatGPtDTO.Message> messages = new ArrayList<>(); // Create message list
         messages.add(new RequestChatGPtDTO.Message("user", userMessage)); // Add user
