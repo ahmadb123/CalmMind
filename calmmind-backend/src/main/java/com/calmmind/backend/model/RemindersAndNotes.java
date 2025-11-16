@@ -2,7 +2,9 @@ package com.calmmind.backend.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "reminders_and_notes")
@@ -14,36 +16,19 @@ public class RemindersAndNotes {
     private Long userId; 
     private String thoughts;
     private LocalDateTime createdAt; 
+    
     @Enumerated(EnumType.STRING)
     private SetOptions setOptions;
     
-    @Enumerated(EnumType.STRING)
-    private WhenOptions whenOptions;
-    
-    @Enumerated(EnumType.STRING)
-    private FrequentAndTimingOptions frequentAndTimingOptions;
-    
-    @Enumerated(EnumType.STRING)
-    private Timing timing;
-    
-    private LocalDateTime reminderDateTime;
+    @OneToMany(mappedBy = "reminder", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<ReminderTime> reminderTimes = new ArrayList<>();
+
+    private Boolean isActive;
 
     // Default constructor
-    public RemindersAndNotes() {}
-
-    // Constructor
-    public RemindersAndNotes(Long userId, String thoughts, LocalDateTime createdAt, 
-                            SetOptions setOptions, WhenOptions whenOptions, 
-                            FrequentAndTimingOptions frequentAndTimingOptions, 
-                            Timing timing, LocalDateTime reminderDateTime) {
-        this.userId = userId;
-        this.thoughts = thoughts;
-        this.createdAt = createdAt;
-        this.setOptions = setOptions;
-        this.whenOptions = whenOptions;
-        this.frequentAndTimingOptions = frequentAndTimingOptions;
-        this.timing = timing;
-        this.reminderDateTime = reminderDateTime;
+    public RemindersAndNotes() {
+        this.isActive = false; // Fixed: was setActive
     }
 
     // Getters and Setters
@@ -87,61 +72,38 @@ public class RemindersAndNotes {
         this.setOptions = setOptions;
     }
 
-    public WhenOptions getWhenOptions() {
-        return whenOptions;
+    public List<ReminderTime> getReminderTimes() {
+        return reminderTimes;
     }
 
-    public void setWhenOptions(WhenOptions whenOptions) {
-        this.whenOptions = whenOptions;
+    public void setReminderTimes(List<ReminderTime> reminderTimes) {
+        this.reminderTimes = reminderTimes;
+    }
+    
+    // Helper method to add reminder times
+    public void addReminderTime(ReminderTime reminderTime) {
+        reminderTimes.add(reminderTime);
+        reminderTime.setReminder(this);
+    }
+    
+    // Helper method to clear reminder times
+    public void clearReminderTimes() {
+        this.reminderTimes.clear();
     }
 
-    public FrequentAndTimingOptions getFrequentAndTimingOptions() {
-        return frequentAndTimingOptions;
+    public Boolean getIsActive() {
+        return isActive;
     }
 
-    public void setFrequentAndTimingOptions(FrequentAndTimingOptions frequentAndTimingOptions) {
-        this.frequentAndTimingOptions = frequentAndTimingOptions;
+    public void setIsActive(Boolean isActive) {
+        this.isActive = isActive;
     }
 
-    public Timing getTiming() {
-        return timing;
-    }
-
-    public void setTiming(Timing timing) {
-        this.timing = timing;
-    }
-
-    public LocalDateTime getReminderDateTime() {
-        return reminderDateTime;
-    }
-
-    public void setReminderDateTime(LocalDateTime reminderDateTime) {
-        this.reminderDateTime = reminderDateTime;
-    }
-
-    // Enums - removed 'static' keyword
+    // Enum
     public enum SetOptions {
         EVERYDAY,
         WEEKDAYS,
         WEEKENDS,
         CUSTOM
-    }
-
-    public enum WhenOptions {
-        MORNING,      // 6am-12pm
-        AFTERNOON,    // 12pm-5pm
-        EVENING,      // 5pm-8pm
-        NIGHT         // 8pm-12am
-    }
-
-    public enum FrequentAndTimingOptions {
-        ONCE,
-        TWICE,
-        THRICE
-    }
-
-    public enum Timing {
-        SPECIFIC_TIME,
-        FLEXIBLE_TIME
     }
 }

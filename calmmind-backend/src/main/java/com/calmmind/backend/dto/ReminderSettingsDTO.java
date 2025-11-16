@@ -1,12 +1,12 @@
 package com.calmmind.backend.dto;
+import java.util.List;
+
 
 import com.calmmind.backend.model.RemindersAndNotes.*;
 
 public class ReminderSettingsDTO {
     private SetOptions setOptions;
-    private WhenOptions whenOptions;
-    private FrequentAndTimingOptions frequentAndTimingOptions;
-    private Timing timing;
+    private List<String> reminderTimes;
     
     public ReminderSettingsDTO() {}
     
@@ -19,27 +19,11 @@ public class ReminderSettingsDTO {
         this.setOptions = setOptions;
     }
     
-    public WhenOptions getWhenOptions() {
-        return whenOptions;
+    public List<String> getReminderTimes() {
+        return reminderTimes;
     }
     
-    public void setWhenOptions(WhenOptions whenOptions) {
-        this.whenOptions = whenOptions;
-    }
-    
-    public FrequentAndTimingOptions getFrequentAndTimingOptions() {
-        return frequentAndTimingOptions;
-    }
-    
-    public void setFrequentAndTimingOptions(FrequentAndTimingOptions frequentAndTimingOptions) {
-        this.frequentAndTimingOptions = frequentAndTimingOptions;
-    }
-    
-    public Timing getTiming() {
-        return timing;
-    }
-    
-    public void setTiming(Timing timing) {
-        this.timing = timing;
+    public void setReminderTimes(List<String> reminderTimes) {
+        this.reminderTimes = reminderTimes;
     }
 }

@@ -67,3 +67,25 @@ export async function updateReminderSettings(id, settings) {
         throw error;
     }
 };
+
+
+export async function deleteReminderOrNoteById(id) {
+    try {
+        const response = await fetch(`${API_URL}/api/reminders-notes/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (response.ok) {
+            return true;
+        } else {
+            const data = await response.json();
+            throw new Error(data.error || 'Failed to delete reminder or note');
+        }
+    } catch (error) {
+        console.error('API Error:', error);
+        throw error;
+    }
+};

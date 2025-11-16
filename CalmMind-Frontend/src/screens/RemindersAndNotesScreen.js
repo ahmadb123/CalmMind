@@ -10,9 +10,9 @@ import {
     ActivityIndicator
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import {createReminderOrNote, fetchRemindersAndNotesByUserId, updateReminderSettings} from '../api/RemindersAndNotesApi';
+import {createReminderOrNote, fetchRemindersAndNotesByUserId, updateReminderSettings , deleteReminderOrNoteById} from '../api/RemindersAndNotesApi';
 import ReminderSettingsModal from '../components/ReminderSettingsModal';
-
+import NotificationService from '../service/NotificationService';
 function RemindersAndNotesScreen({route, navigation}) {
     const {user} = route.params;
     if(!user){
@@ -87,10 +87,16 @@ function RemindersAndNotesScreen({route, navigation}) {
 
     const handleSaveReminder = async (settings) => {
         try {
-            await updateReminderSettings(selectedReminder.id, settings);
+            const updated = await updateReminderSettings(selectedReminder.id, settings);
+            try{
+                await NotificationService.scheduleReminders(updated, user.username);
+                Alert.alert('Success', 'Reminder scheduled successfully!');
+            }catch(notifError){
+                console.error('Error scheduling notifications:', notifError);
+                Alert.alert('Partial Success', 'Reminder saved but failed to schedule notifications.');
+            }
             setShowReminderModal(false);
             setSelectedReminder(null);
-            Alert.alert('Success', 'Reminder settings saved!');
             fetchRemindersAndNotes();
         } catch (err) {
             Alert.alert('Error', err.message);
@@ -100,6 +106,36 @@ function RemindersAndNotesScreen({route, navigation}) {
     const handleSetReminderForExisting = (item) => {
         setSelectedReminder(item);
         setShowReminderModal(true);
+    };
+
+    const handleDeleteNote = async (item) => {
+        Alert.alert(
+            'Delete Note',
+            'Are you sure you want to delete this note and its reminders?',
+            [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                    text: 'Delete',
+                    style: 'destructive',
+                    onPress: async () => {
+                        try {
+                            // Cancel notifications first
+                            if (item.reminderTimes?.length > 0) {
+                                await NotificationService.cancelRemindersForNote(item.id);
+                            }
+                            
+                            // Delete from backend
+                            await deleteReminderOrNoteById(item.id);
+                            
+                            Alert.alert('Success', 'Note deleted');
+                            fetchRemindersAndNotes();
+                        } catch (err) {
+                            Alert.alert('Error', err.message);
+                        }
+                    }
+                }
+            ]
+        );
     };
 
     if(loading && remindersAndNotes.length === 0) {
@@ -114,7 +150,10 @@ function RemindersAndNotesScreen({route, navigation}) {
     return (
         <SafeAreaView style={styles.container}>
             <Text style={styles.header}>My Notes & Reminders 📝</Text>
-            
+            {/* back button */}
+            <TouchableOpacity onPress={() => navigation.goBack()}>
+                <Text style={styles.backText}>← Back</Text>
+            </TouchableOpacity>
             {error && <Text style={styles.errorText}>{error}</Text>}
             
             {/* Create Note Section */}
@@ -157,11 +196,21 @@ function RemindersAndNotesScreen({route, navigation}) {
                                 </Text>
                                 
                                 {/* Show reminder status */}
-                                {item.setOptions ? (
+                                {item.reminderTimes && item.reminderTimes.length > 0 ? (
                                     <View style={styles.reminderBadge}>
                                         <Text style={styles.reminderBadgeText}>
-                                            🔔 {item.setOptions} • {item.whenOptions}
+                                            🔔 {item.setOptions} • {item.reminderTimes.length} {item.reminderTimes.length === 1 ? 'time' : 'times'}
                                         </Text>
+                                        <View style={styles.timesContainer}>
+                                            {item.reminderTimes.map((timeObj, idx) => (
+                                                <Text key={idx} style={styles.timeChip}>
+                                                    {new Date(`2000-01-01T${timeObj.time}`).toLocaleTimeString([], { 
+                                                        hour: '2-digit', 
+                                                        minute: '2-digit' 
+                                                    })}
+                                                </Text>
+                                            ))}
+                                        </View>
                                     </View>
                                 ) : (
                                     <TouchableOpacity
@@ -173,6 +222,14 @@ function RemindersAndNotesScreen({route, navigation}) {
                                         </Text>
                                     </TouchableOpacity>
                                 )}
+                                <TouchableOpacity
+                                    style={[styles.setReminderButton, {marginTop: 10, borderColor: '#E53935'}]}
+                                    onPress={() => handleDeleteNote(item)}
+                                >
+                                    <Text style={[styles.setReminderText, {color: '#E53935'}]}>
+                                        🗑️ Delete Note
+                                    </Text>
+                                </TouchableOpacity>
                             </View>
                         </View>
                     )}
@@ -336,5 +393,20 @@ const styles = StyleSheet.create({
         color: '#666',
         textAlign: 'center',
         lineHeight: 20,
+    },
+    timesContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 5,
+    marginTop: 8,
+    },
+    timeChip: {
+        backgroundColor: '#C8E6C9',
+        paddingVertical: 4,
+        paddingHorizontal: 8,
+        borderRadius: 12,
+        fontSize: 11,
+        color: '#1B5E20',
+        fontWeight: '600',
     },
 });

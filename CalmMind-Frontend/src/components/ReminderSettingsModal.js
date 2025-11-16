@@ -6,21 +6,57 @@ import {
     Modal,
     TouchableOpacity,
     ScrollView,
+    Alert,
+    Platform
 } from 'react-native';
+
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 function ReminderSettingsModal({ visible, onClose, onSave, reminder }) {
     const [setOptions, setSetOptions] = useState('EVERYDAY');
-    const [whenOptions, setWhenOptions] = useState('MORNING');
-    const [frequentOptions, setFrequentOptions] = useState('ONCE');
-    const [timingOptions, setTimingOptions] = useState('FLEXIBLE_TIME');
+    const [reminderTimes, setReminderTimes] = useState([new Date()]);
+    const [showTimePicker , setShowTimePicker] = useState(null);
+
+    const formatTime = (date) => {
+        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    };
+
+    const formatTimeForBackend = (date) => {
+        const hours = date.getHours().toString().padStart(2, '0');
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+        return `${hours}:${minutes}:00`;
+    };
+
+    const addReminderTime = () => {
+        if(reminderTimes.length >= 10){
+            Alert.alert('Limit Reached', 'You can add up to 10 reminder times only.');
+            return;
+        }
+        setReminderTimes([...reminderTimes, new Date()]);
+    }
+
+    const removeReminderTime = (index) => {
+        if(reminderTimes.length === 1){
+            Alert.alert('At least one time required', 'You must have at least one reminder time.');
+            return;
+        }
+        const newTimes = reminderTimes.filter((_, i) => i !== index);
+        setReminderTimes(newTimes);
+    };
+
+    const updateTime = (index, newTime) => {
+        const newTimes = [...reminderTimes];
+        newTimes[index] = newTime;
+        setReminderTimes(newTimes);
+    };
+
 
     const handleSave = () => {
-        onSave({
-            setOptions,
-            whenOptions,
-            frequentAndTimingOptions: frequentOptions,
-            timing: timingOptions,
-        });
+        const settings = {
+            setOptions, 
+            reminderTimes: reminderTimes.map(date => formatTimeForBackend(date)),
+        };
+        onSave(settings);
     };
 
     return (
@@ -44,7 +80,7 @@ function ReminderSettingsModal({ visible, onClose, onSave, reminder }) {
                         {/* When to remind */}
                         <Text style={styles.sectionTitle}>When to remind?</Text>
                         <View style={styles.optionsGrid}>
-                            {['EVERYDAY', 'WEEKDAYS', 'WEEKENDS', 'CUSTOM'].map((option) => (
+                            {['EVERYDAY', 'WEEKDAYS', 'WEEKENDS'].map((option) => (
                                 <TouchableOpacity
                                     key={option}
                                     style={[
@@ -65,77 +101,52 @@ function ReminderSettingsModal({ visible, onClose, onSave, reminder }) {
                             ))}
                         </View>
 
-                        {/* Time of day */}
-                        <Text style={styles.sectionTitle}>What time of day?</Text>
-                        <View style={styles.optionsGrid}>
-                            {['MORNING', 'AFTERNOON', 'EVENING', 'NIGHT'].map((option) => (
-                                <TouchableOpacity
-                                    key={option}
-                                    style={[
-                                        styles.optionButton,
-                                        whenOptions === option && styles.optionButtonSelected,
-                                    ]}
-                                    onPress={() => setWhenOptions(option)}
-                                >
-                                    <Text
-                                        style={[
-                                            styles.optionText,
-                                            whenOptions === option && styles.optionTextSelected,
-                                        ]}
-                                    >
-                                        {option}
-                                    </Text>
-                                </TouchableOpacity>
-                            ))}
+                        {/* Time Pickers */}
+                        <View style={styles.timesHeader}>
+                            <Text style={styles.sectionTitle}>Reminder Times</Text>
+                            <TouchableOpacity 
+                                style={styles.addButton}
+                                onPress={addReminderTime}
+                            >
+                                <Text style={styles.addButtonText}>+ Add Time</Text>
+                            </TouchableOpacity>
                         </View>
+                        
+                        {reminderTimes.map((time, index) => (
+                            <View key={index} style={styles.timeRow}>
+                                <TouchableOpacity
+                                    style={styles.timePickerButton}
+                                    onPress={() => setShowTimePicker(index)}
+                                >
+                                    <Text style={styles.timeLabel}>Time {index + 1}:</Text>
+                                    <Text style={styles.timeValue}>{formatTime(time)}</Text>
+                                </TouchableOpacity>
+                                
+                                {reminderTimes.length > 1 && (
+                                    <TouchableOpacity
+                                        style={styles.removeButton}
+                                        onPress={() => removeReminderTime(index)}
+                                    >
+                                        <Text style={styles.removeButtonText}>✕</Text>
+                                    </TouchableOpacity>
+                                )}
+                            </View>
+                        ))}
 
-                        {/* Frequency */}
-                        <Text style={styles.sectionTitle}>How many times?</Text>
-                        <View style={styles.optionsGrid}>
-                            {['ONCE', 'TWICE', 'THRICE'].map((option) => (
-                                <TouchableOpacity
-                                    key={option}
-                                    style={[
-                                        styles.optionButton,
-                                        frequentOptions === option && styles.optionButtonSelected,
-                                    ]}
-                                    onPress={() => setFrequentOptions(option)}
-                                >
-                                    <Text
-                                        style={[
-                                            styles.optionText,
-                                            frequentOptions === option && styles.optionTextSelected,
-                                        ]}
-                                    >
-                                        {option}
-                                    </Text>
-                                </TouchableOpacity>
-                            ))}
-                        </View>
-
-                        {/* Timing preference */}
-                        <Text style={styles.sectionTitle}>Timing preference</Text>
-                        <View style={styles.optionsGrid}>
-                            {['SPECIFIC_TIME', 'FLEXIBLE_TIME'].map((option) => (
-                                <TouchableOpacity
-                                    key={option}
-                                    style={[
-                                        styles.optionButton,
-                                        timingOptions === option && styles.optionButtonSelected,
-                                    ]}
-                                    onPress={() => setTimingOptions(option)}
-                                >
-                                    <Text
-                                        style={[
-                                            styles.optionText,
-                                            timingOptions === option && styles.optionTextSelected,
-                                        ]}
-                                    >
-                                        {option.replace('_', ' ')}
-                                    </Text>
-                                </TouchableOpacity>
-                            ))}
-                        </View>
+                        {showTimePicker !== null && (
+                            <DateTimePicker
+                                value={reminderTimes[showTimePicker]}
+                                mode="time"
+                                is24Hour={false}
+                                display="default"
+                                onChange={(event, selectedTime) => {
+                                    setShowTimePicker(Platform.OS === 'ios' ? showTimePicker : null);
+                                    if (selectedTime) {
+                                        updateTime(showTimePicker, selectedTime);
+                                    }
+                                }}
+                            />
+                        )}
 
                         {/* Action buttons */}
                         <View style={styles.buttonContainer}>
@@ -149,7 +160,9 @@ function ReminderSettingsModal({ visible, onClose, onSave, reminder }) {
                                 style={[styles.actionButton, styles.saveButton]}
                                 onPress={handleSave}
                             >
-                                <Text style={styles.saveButtonText}>Save Reminder</Text>
+                                <Text style={styles.saveButtonText}>
+                                    Save ({reminderTimes.length} {reminderTimes.length === 1 ? 'time' : 'times'})
+                                </Text>
                             </TouchableOpacity>
                         </View>
                     </ScrollView>
@@ -221,7 +234,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         borderWidth: 2,
         borderColor: '#A8DADC',
-        minWidth: '45%',
+        minWidth: '30%',
         alignItems: 'center',
     },
     optionButtonSelected: {
@@ -236,6 +249,63 @@ const styles = StyleSheet.create({
     },
     optionTextSelected: {
         color: '#FFFFFF',
+    },
+    timesHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 10,
+    },
+    addButton: {
+        backgroundColor: '#4CAF50',
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 8,
+    },
+    addButtonText: {
+        color: '#FFFFFF',
+        fontSize: 14,
+        fontWeight: '600',
+    },
+    timeRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 10,
+        marginBottom: 10,
+    },
+    timePickerButton: {
+        flex: 1,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        backgroundColor: '#F1FAEE',
+        padding: 15,
+        borderRadius: 10,
+        borderWidth: 2,
+        borderColor: '#A8DADC',
+    },
+    timeLabel: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#1D3557',
+    },
+    timeValue: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#457B9D',
+    },
+    removeButton: {
+        backgroundColor: '#E63946',
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    removeButtonText: {
+        color: '#FFFFFF',
+        fontSize: 20,
+        fontWeight: 'bold',
     },
     buttonContainer: {
         flexDirection: 'row',

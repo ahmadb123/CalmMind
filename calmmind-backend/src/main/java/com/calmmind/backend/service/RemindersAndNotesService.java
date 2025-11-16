@@ -1,14 +1,19 @@
 package com.calmmind.backend.service;
 
+import com.calmmind.backend.dto.ReminderSettingsDTO;
 import com.calmmind.backend.model.RemindersAndNotes;
 import com.calmmind.backend.repository.UserRepository;
 import com.calmmind.backend.repository.RemindersAndNotesRepository;
 import com.calmmind.backend.model.User;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.ArrayList;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import com.calmmind.backend.model.ReminderTime;
+
 @Service
 public class RemindersAndNotesService implements IRemindersAndNotesService {
     private final RemindersAndNotesRepository remindersAndNotesRepository;
@@ -48,20 +53,30 @@ public class RemindersAndNotesService implements IRemindersAndNotesService {
         RemindersAndNotes reminderOrNote = reminderOrNoteOpt.get();
         return reminderOrNote;
     }
-@Override 
-    public RemindersAndNotes setReminderTimeAndDate(Long id, 
-                                                    RemindersAndNotes.SetOptions setOptions, 
-                                                    RemindersAndNotes.WhenOptions whenOptions, 
-                                                    RemindersAndNotes.FrequentAndTimingOptions frequentAndTimingOptions, 
-                                                    RemindersAndNotes.Timing timing) {
-        RemindersAndNotes remindersAndNotes = getReminderOrNote(id);
-        
-        remindersAndNotes.setSetOptions(setOptions);
-        remindersAndNotes.setWhenOptions(whenOptions);
-        remindersAndNotes.setFrequentAndTimingOptions(frequentAndTimingOptions);
-        remindersAndNotes.setTiming(timing);
-        
-        return remindersAndNotesRepository.save(remindersAndNotes);
+    @Override 
+    @Transactional
+    public RemindersAndNotes setReminderTimeAndDate(Long id, ReminderSettingsDTO settings) {
+        RemindersAndNotes reminderOrNote = getReminderOrNote(id);
+        // update fields based on settings
+        reminderOrNote.setSetOptions(settings.getSetOptions());
+        reminderOrNote.setIsActive(true);
+
+        reminderOrNote.clearReminderTimes();
+        // add new reminder times
+        if(settings.getReminderTimes() != null && !settings.getReminderTimes().isEmpty()){
+            for(String timeString : settings.getReminderTimes()){
+                try{
+                    LocalTime dateTime = LocalTime.parse(timeString);
+                    ReminderTime time = new ReminderTime(reminderOrNote , dateTime);
+                    reminderOrNote.addReminderTime(time);
+                }catch(Exception e){
+                    throw new IllegalArgumentException("Invalid date time format: " + timeString);
+                }
+            }
+        }else{
+            throw new IllegalArgumentException("Reminder times cannot be null or empty");
+        }
+        return remindersAndNotesRepository.save(reminderOrNote);
     }
     @Override
     public void deleteReminderOrNoteById(Long id){

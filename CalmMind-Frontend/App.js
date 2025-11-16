@@ -1,4 +1,4 @@
-import React from 'react';
+import React , {useEffect} from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import LoginScreen from './src/screens/LoginScreen';
@@ -11,9 +11,17 @@ import ToolDetailScreen from './src/screens/ToolDetailScreen';
 import MyStyleScreen from './src/screens/MyStyleScreen';
 import CalmDownScreen from './src/screens/CalmDownScreen';
 import RemindersAndNotesScreen from './src/screens/RemindersAndNotesScreen';
+import NotificationService from './src/service/NotificationService';
 const Stack = createNativeStackNavigator();
 
 function App(){
+  useEffect(() => {
+    // request notification permissions on app start
+    NotificationService.requestPermission();
+    NotificationService.createChannel();
+  }, []);
+
+  
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Register">

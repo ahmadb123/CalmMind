@@ -10,7 +10,7 @@ import {
     ScrollView 
 } from 'react-native';
 
-function CalmDownScreen() {
+function CalmDownScreen({ navigation }) {
     const [loading, setLoading] = useState(false);
     const [response, setResponse] = useState('');
     const [error, setError] = useState(null);
@@ -95,7 +95,9 @@ function CalmDownScreen() {
                 Whether you feel like talking to someone, listening to audio, meditating, 
                 breathing, grounding, or receiving support — we've got you.
             </Text>
-
+            <TouchableOpacity onPress={() => navigation.goBack()}>
+                        <Text style={styles.backText}>← Back</Text>
+            </TouchableOpacity>
             <TextInput
                 style={styles.input}
                 placeholder="Hello I'm not feeling the best today."
