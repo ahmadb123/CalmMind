@@ -6,13 +6,14 @@ import com.calmmind.backend.repository.QuizQuestionRepository;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
+import java.util.List;
 
 @Component
-public class DataInitializer {
-    
+public class QuizQuestionDataInitializer {
+
     private final QuizQuestionRepository quizQuestionRepository;
     
-    public DataInitializer(QuizQuestionRepository quizQuestionRepository) {
+    public QuizQuestionDataInitializer(QuizQuestionRepository quizQuestionRepository) {
         this.quizQuestionRepository = quizQuestionRepository;
     }
     

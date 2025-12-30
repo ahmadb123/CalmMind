@@ -12,6 +12,7 @@ import MyStyleScreen from './src/screens/MyStyleScreen';
 import CalmDownScreen from './src/screens/CalmDownScreen';
 import RemindersAndNotesScreen from './src/screens/RemindersAndNotesScreen';
 import NotificationService from './src/service/NotificationService';
+import PartnerStyleScreen from './src/screens/PartnerStyleScreen';
 const Stack = createNativeStackNavigator();
 
 function App(){
@@ -73,6 +74,11 @@ function App(){
         <Stack.Screen
           name="RemindersAndNotes"
           component={RemindersAndNotesScreen}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen 
+          name="PartnerStyleScreen"
+          component={PartnerStyleScreen}
           options={{headerShown: false}}
         />
       </Stack.Navigator>

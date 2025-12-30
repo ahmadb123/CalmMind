@@ -1,7 +1,6 @@
 import config from '../constants/config';
 const API_URL = config.API_URL;
 
-
 export async function createReminderOrNote(reminderOrNote) {
     try{
         const response = await fetch(`${API_URL}/api/reminders-notes/create`, {
@@ -67,7 +66,6 @@ export async function updateReminderSettings(id, settings) {
         throw error;
     }
 };
-
 
 export async function deleteReminderOrNoteById(id) {
     try {

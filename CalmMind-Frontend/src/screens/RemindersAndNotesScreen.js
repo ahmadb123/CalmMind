@@ -13,7 +13,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import {createReminderOrNote, fetchRemindersAndNotesByUserId, updateReminderSettings , deleteReminderOrNoteById} from '../api/RemindersAndNotesApi';
 import ReminderSettingsModal from '../components/ReminderSettingsModal';
 import NotificationService from '../service/NotificationService';
+
 function RemindersAndNotesScreen({route, navigation}) {
+
     const {user} = route.params;
     if(!user){
         Alert.alert('Error', 'User not found. Please login again.');

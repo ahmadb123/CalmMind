@@ -26,7 +26,6 @@ function MyStyleScreen({route, navigation}){
     const loadQuizResults = async () => {
         try {
             const results = await fetchQuizResults(user.id);
-            // ✅ UPDATED: Check for primaryStyle instead of attachmentStyle
             if (results && results.primaryStyle) {
                 setQuizResults(results);
             } else {

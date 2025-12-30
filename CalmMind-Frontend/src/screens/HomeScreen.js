@@ -22,7 +22,7 @@ function HomeScreen({ route, navigation }) {
     loadCurrentAffirmation();
   }, []);
 
-  // ✅ Smart function that picks the right affirmation loader
+  
   const loadCurrentAffirmation = () => {
     if (usersStyle) {
       // debugger; print usersStyle
@@ -158,21 +158,30 @@ function HomeScreen({ route, navigation }) {
           )}
 
           {/* Show Attachment Style Card if user has taken quiz */}
-          {usersStyle && (
-            <TouchableOpacity 
-              style={styles.styleCard}
-              onPress={() => navigation.navigate('Quiz', { user })}
-              activeOpacity={0.8}
+       {usersStyle && (
+        <View style={styles.styleCard}>
+          <Text style={styles.styleIcon}>✨</Text>
+          <Text style={styles.styleTitle}>Your Attachment Style</Text>
+          <Text style={styles.styleValue}>{usersStyle.replace('_', ' ')}</Text>
+
+          <View style={styles.styleActions}>
+            <TouchableOpacity
+              style={styles.secondaryButton}
+              onPress={() => navigation.navigate('MyStyleScreen', { user })}
             >
-              <Text style={styles.styleIcon}>✨</Text>
-              <Text style={styles.styleTitle}>Your Attachment Style</Text>
-              <Text style={styles.styleValue}>{usersStyle.replace('_', ' ')}</Text>
-              <View style={styles.styleButton}>
-                <Text style={styles.styleButtonText}>View Details →</Text>
-              </View>
+              <Text style={styles.secondaryButtonText}>My Style</Text>
             </TouchableOpacity>
-          )}
+
+            <TouchableOpacity
+              style={styles.primaryButton}
+              onPress={() => navigation.navigate('PartnerStyleScreen')}
+            >
+              <Text style={styles.primaryButtonText}>Partner Style →</Text>
+            </TouchableOpacity>
+          </View>
         </View>
+        )}
+      </View>
 
         {/* Quick Help */}
         <View style={{ paddingHorizontal: 20 }}>
@@ -499,5 +508,39 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#457B9D',
     textAlign: 'center',
+  },
+
+  styleActions: {
+  flexDirection: 'row',
+  gap: 12,
+  width: '100%',
+  },
+
+  secondaryButton: {
+    flex: 1,
+    backgroundColor: '#E0E0E0',
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+
+  secondaryButtonText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#333',
+  },
+
+  primaryButton: {
+    flex: 1,
+    backgroundColor: '#457B9D',
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+
+  primaryButtonText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#FFF',
   },
 });

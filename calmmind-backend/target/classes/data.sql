@@ -83,3 +83,183 @@ INSERT INTO quiz_questions (question_text, dimension, question_number) VALUES
 ('I don''t feel comfortable opening up to romantic partners.', 'AVOIDANCE', 10),
 ('I prefer not to be too close to romantic partners.', 'AVOIDANCE', 11),
 ('I am nervous when partners get too close to me.', 'AVOIDANCE', 12);
+
+
+/* PARTNER STYLE QUESTION GROUPS */
+INSERT INTO partner_style_question_groups(id, group_name, min_score, max_score) VALUES 
+(100, 'AVOIDANT', 11 , 33),
+(200, 'SECURE', 11, 33),
+(300, 'ANXIOUS', 11, 33);
+
+/*PARTNER STYLE QUIZ QUESTIONS */
+
+/*AVOIDANT */
+INSERT INTO partner_style_quiz_questions(id, question_text, question_group_id, question_num, created_at)VALUES 
+(1001, 'Sends mixed signals.', 100, 1, NOW()),
+(1002, 'Values independence greatly.', 100, 2, NOW()),
+(1003, 'Devalues partners.', 100, 3, NOW()),
+(1004, 'Uses distancing strategies.', 100, 4, NOW()),
+(1005, 'Emphasizes boundaries.', 100, 5, NOW()),
+(1006, 'Has unrealistically romantic views.', 100, 6, NOW()),
+(1007, 'Mistrustful of partners.', 100, 7, NOW()),
+(1008, 'Rigid relationship rules.', 100, 8, NOW()),
+(1009, 'Withdraws or explodes during conflict.', 100, 9, NOW()),
+(1010, 'Does not clarify intentions.', 100, 10, NOW()),
+(1011, 'Avoids relationship discussions.', 100, 11, NOW());
+
+
+-- SECURE
+INSERT INTO partner_style_quiz_questions(id, question_text, question_group_id, question_num, created_at) VALUES
+(2001, 'Reliable and consistent.', 200, 1, NOW()),
+(2002, 'Makes decisions together.', 200, 2, NOW()),
+(2003, 'Flexible relationship views.', 200, 3, NOW()),
+(2004, 'Communicates well.', 200, 4, NOW()),
+(2005, 'Resolves conflicts constructively.', 200, 5, NOW()),
+(2006, 'Comfortable with commitment.', 200, 6, NOW()),
+(2007, 'Views relationships as balanced.', 200, 7, NOW()),
+(2008, 'Closeness builds closeness.', 200, 8, NOW()),
+(2009, 'Includes you socially.', 200, 9, NOW()),
+(2010, 'Expresses love openly.', 200, 10, NOW()),
+(2011, 'Does not play games.', 200, 11, NOW());
+
+-- ANXIOUS
+INSERT INTO partner_style_quiz_questions(id, question_text, question_group_id, question_num, created_at) VALUES
+(3001, 'Seeks high closeness.', 300, 1, NOW()),
+(3002, 'Expresses insecurities.', 300, 2, NOW()),
+(3003, 'Unhappy when single.', 300, 3, NOW()),
+(3004, 'Plays attention-seeking games.', 300, 4, NOW()),
+(3005, 'Expects mind-reading.', 300, 5, NOW()),
+(3006, 'Acts out emotionally.', 300, 6, NOW()),
+(3007, 'Personalizes behavior.', 300, 7, NOW()),
+(3008, 'Avoids emotional risk.', 300, 8, NOW()),
+(3009, 'Preoccupied with relationship.', 300, 9, NOW()),
+(3010, 'Overanalyzes interactions.', 300, 10, NOW()),
+(3011, 'Fears infidelity.', 300, 11, NOW());
+
+
+/*QUESTION DESCRIPTIONS*/
+
+-- =========================
+-- QUESTION DESCRIPTIONS
+-- =========================
+INSERT INTO question_descriptions (question_id, description) VALUES
+
+-- ===== GROUP A — AVOIDANT =====
+(1001, 'Seems distant and aloof yet vulnerable at the same time.'),
+(1001, 'Sometimes calls a lot and other times not at all.'),
+(1001, 'Says something intimate but later acts as though there is no future.'),
+
+(1002, 'Needs a lot of space.'),
+(1002, 'Work leaves no room for a serious relationship.'),
+(1002, 'Rejects emotional dependency or neediness.'),
+
+(1003, 'Jokes about your flaws, even if playfully.'),
+(1003, 'Fixates on physical flaws in past partners.'),
+(1003, 'Cheated on a past partner.'),
+
+(1004, 'Maintains emotional or physical distance.'),
+(1004, 'Avoids shared living or sleeping arrangements.'),
+(1004, 'Prefers taking vacations alone.'),
+(1004, 'Leaves future plans unclear.'),
+(1004, 'Physically distances themselves when together.'),
+
+(1005, 'Keeps friends or family separate from the relationship.'),
+(1005, 'Avoids inviting you into their personal space.'),
+
+(1006, 'Longs for a perfect future partner.'),
+(1006, 'Idealizes past relationships without clarity.'),
+
+(1007, 'Fears being financially or emotionally exploited.'),
+(1007, 'Suspects partners have hidden motives.'),
+
+(1008, 'Has rigid rules about relationships.'),
+(1008, 'Strongly prefers a specific partner type.'),
+(1008, 'Believes marriage or shared living is a bad idea.'),
+(1008, 'Makes sweeping negative statements about partners.'),
+(1008, 'Avoids phone communication even when important.'),
+
+(1009, 'Withdraws during disagreements.'),
+(1009, 'Explodes emotionally and walks away.'),
+
+(1010, 'Avoids saying “I love you” despite long-term involvement.'),
+(1010, 'Makes long-term plans without including you.'),
+
+(1011, 'Avoids conversations about the relationship.'),
+(1011, 'Responds vaguely without clarification.'),
+(1011, 'Certain relationship topics are off-limits.'),
+
+-- ===== GROUP B — SECURE =====
+(2001, 'Calls when they say they will.'),
+(2001, 'Follows through on plans.'),
+(2001, 'Explains or apologizes when plans change.'),
+
+(2002, 'Discusses plans openly.'),
+(2002, 'Considers your preferences.'),
+
+(2003, 'Open to different relationship arrangements.'),
+(2003, 'Does not look for a rigid partner type.'),
+(2003, 'Avoids sweeping negative relationship statements.'),
+
+(2004, 'Encourages open relationship conversations.'),
+(2004, 'Addresses concerns directly instead of acting out.'),
+
+(2005, 'Tries to understand your perspective.'),
+(2005, 'Focuses on solving problems rather than winning.'),
+
+(2006, 'Comfortable with emotional closeness.'),
+(2006, 'Does not fear dependency or commitment.'),
+
+(2007, 'Does not emphasize struggle or sacrifice.'),
+(2007, 'Open to relationships even when life is imperfect.'),
+
+(2008, 'Reassures after emotional conversations.'),
+(2008, 'Expresses closeness after intimacy.'),
+
+(2009, 'Introduces you to friends and family.'),
+(2009, 'Includes you in their social world.'),
+
+(2010, 'Expresses feelings early.'),
+(2010, 'Uses “I love you” naturally.'),
+
+(2011, 'Avoids manipulation or jealousy tactics.'),
+(2011, 'Does not keep score in communication.'),
+
+-- ===== GROUP C — ANXIOUS =====
+(3001, 'Seeks frequent closeness early in relationships.'),
+(3001, 'Enjoys a high level of physical affection.'),
+
+(3002, 'Worries about rejection.'),
+(3002, 'Compares themselves to past partners.'),
+(3002, 'Tries hard to please their partner.'),
+
+(3003, 'Feels unhappy or incomplete when single.'),
+(3003, 'Approaches dating with desperation.'),
+
+(3004, 'Acts distant to provoke reassurance.'),
+(3004, 'Pretends to be unavailable.'),
+(3004, 'Manipulates situations to gain attention.'),
+
+(3005, 'Uses subtle emotional cues.'),
+(3005, 'Expects partner to guess what is wrong.'),
+
+(3006, 'Threatens to leave during conflicts.'),
+(3006, 'Stores resentment instead of communicating.'),
+
+(3007, 'Interprets neutral behavior as rejection.'),
+(3007, 'Personalizes situations excessively.'),
+
+(3008, 'Mirrors partner’s emotional investment.'),
+(3008, 'Avoids emotional risk to prevent hurt.'),
+
+(3009, 'Obsessively analyzes relationship details.'),
+(3009, 'Communicates excessively or withdraws completely.'),
+
+(3010, 'Overthinks small actions or comments.'),
+(3010, 'Fears partner will lose interest.'),
+
+(3011, 'Checks messages or passwords.'),
+(3011, 'Monitors partner’s whereabouts.'),
+(3011, 'Searches belongings for signs of infidelity.');
+
+
+
