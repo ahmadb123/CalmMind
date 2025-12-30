@@ -78,7 +78,7 @@ function PartnerStyleScreen({ navigation }) {
 
           <TouchableOpacity
             style={styles.primaryButton}
-            onPress={() => navigation.navigate('PartnerQuiz')}
+            onPress={() => navigation.navigate('PartnerQuizScreen')}
           >
             <Text style={styles.primaryButtonText}>
               Start Partner Quiz →
@@ -110,7 +110,7 @@ function PartnerStyleScreen({ navigation }) {
 
         <TouchableOpacity
           style={styles.secondaryButton}
-          onPress={() => navigation.navigate('PartnerQuiz')}
+          onPress={() => navigation.navigate('PartnerQuizScreen')}
         >
           <Text style={styles.secondaryButtonText}>Retake Quiz</Text>
         </TouchableOpacity>

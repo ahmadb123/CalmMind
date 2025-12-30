@@ -11,9 +11,11 @@
 /Users/ahmadbishara/Desktop/CalmMind/CalmMind-Backend/src/main/java/com/calmmind/backend/model/QuizDimension.java
 /Users/ahmadbishara/Desktop/CalmMind/CalmMind-Backend/src/main/java/com/calmmind/backend/service/AnxietyReliefToolFeatureService.java
 /Users/ahmadbishara/Desktop/CalmMind/CalmMind-Backend/src/main/java/com/calmmind/backend/dto/QuizResultDTO.java
+/Users/ahmadbishara/Desktop/CalmMind/CalmMind-Backend/src/main/java/com/calmmind/backend/repository/PartnerAttachmentStyleTestRepo/PartnerStyleQuizResponseRepository.java
 /Users/ahmadbishara/Desktop/CalmMind/CalmMind-Backend/src/main/java/com/calmmind/backend/quiz/strategy/ScoringStrategy.java
 /Users/ahmadbishara/Desktop/CalmMind/CalmMind-Backend/src/main/java/com/calmmind/backend/dto/ResponseChatGPtDTO.java
 /Users/ahmadbishara/Desktop/CalmMind/CalmMind-Backend/src/main/java/com/calmmind/backend/controller/PartnerStyleQuizController.java
+/Users/ahmadbishara/Desktop/CalmMind/CalmMind-Backend/src/main/java/com/calmmind/backend/model/PartnerStyleModel/PartnerStyleQuizResponse.java
 /Users/ahmadbishara/Desktop/CalmMind/CalmMind-Backend/src/main/java/com/calmmind/backend/AnxietyFeature/ToolUsageLog.java
 /Users/ahmadbishara/Desktop/CalmMind/CalmMind-Backend/src/main/java/com/calmmind/backend/service/IRemindersAndNotesService.java
 /Users/ahmadbishara/Desktop/CalmMind/CalmMind-Backend/src/main/java/com/calmmind/backend/service/IAffirmationService.java
@@ -56,6 +58,7 @@
 /Users/ahmadbishara/Desktop/CalmMind/CalmMind-Backend/src/main/java/com/calmmind/backend/repository/QuizResponseRepository.java
 /Users/ahmadbishara/Desktop/CalmMind/CalmMind-Backend/src/main/java/com/calmmind/backend/quiz/AnxietyScoringStrategy.java
 /Users/ahmadbishara/Desktop/CalmMind/CalmMind-Backend/src/main/java/com/calmmind/backend/service/PartnerStyleTestService/PartnerStyleTestService.java
+/Users/ahmadbishara/Desktop/CalmMind/CalmMind-Backend/src/main/java/com/calmmind/backend/dto/PartnerStyleQuizResponseDTO.java
 /Users/ahmadbishara/Desktop/CalmMind/CalmMind-Backend/src/main/java/com/calmmind/backend/service/OpenAIService.java
 /Users/ahmadbishara/Desktop/CalmMind/CalmMind-Backend/src/main/java/com/calmmind/backend/model/QuizQuestion.java
 /Users/ahmadbishara/Desktop/CalmMind/CalmMind-Backend/src/main/java/com/calmmind/backend/repository/PartnerAttachmentStyleTestRepo/PartnerStyleQuizQuestionRepository.java

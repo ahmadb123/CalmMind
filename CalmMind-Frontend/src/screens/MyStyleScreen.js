@@ -49,7 +49,6 @@ function MyStyleScreen({route, navigation}){
         );
     }
 
-    // ✅ UPDATED: Check for primaryStyle
     if (error || !quizResults || !quizResults.primaryStyle) {
         return (
             <SafeAreaView style={styles.container}>
