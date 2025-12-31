@@ -9,22 +9,23 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AppFooter from '../components/AppFooter';
-import { fetchPartnerStyleQuizQuestions } from '../api/PartnerQuizApi';
+import { getPartnerStyleQuizResults } from '../api/PartnerQuizApi';
 
-function PartnerStyleScreen({ navigation }) {
+function PartnerStyleScreen({ route , navigation }) {
   const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-
-  useEffect(() => {
+  const {user} = route.params || {};
+  useEffect(() => { 
     loadResults();
   }, []);
 
   const loadResults = async () => {
     try {
-      const data = await fetchPartnerStyleQuizQuestions();
-      if (!data || data.length === 0) {
-        setResults(null);
+      const data = await getPartnerStyleQuizResults(user?.id);
+      if (!data) {
+        navigation.replace('PartnerQuizScreen', {user});
+        return;
       } else {
         setResults(data);
       }
@@ -58,40 +59,7 @@ function PartnerStyleScreen({ navigation }) {
 
   /* ===================== NO QUIZ YET ===================== */
 
-  if (!results) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <ScrollView contentContainerStyle={styles.scrollContent}>
-          <Text style={styles.title}>Partner Attachment Style</Text>
 
-          <Text style={styles.subtitle}>
-            Learn how your partner typically behaves in relationships and
-            how it may affect communication, closeness, and conflict.
-          </Text>
-
-          <View style={styles.infoCard}>
-            <Text style={styles.infoText}>
-              This quiz helps you better understand your partner’s emotional
-              patterns — not to label them, but to improve connection.
-            </Text>
-          </View>
-
-          <TouchableOpacity
-            style={styles.primaryButton}
-            onPress={() => navigation.navigate('PartnerQuizScreen')}
-          >
-            <Text style={styles.primaryButtonText}>
-              Start Partner Quiz →
-            </Text>
-          </TouchableOpacity>
-        </ScrollView>
-
-        <AppFooter navigation={navigation} />
-      </SafeAreaView>
-    );
-  }
-
-  /* ===================== RESULTS ===================== */
 
   return (
     <SafeAreaView style={styles.container}>
@@ -110,7 +78,7 @@ function PartnerStyleScreen({ navigation }) {
 
         <TouchableOpacity
           style={styles.secondaryButton}
-          onPress={() => navigation.navigate('PartnerQuizScreen')}
+          onPress={() => navigation.navigate('PartnerQuizScreen', {user})}
         >
           <Text style={styles.secondaryButtonText}>Retake Quiz</Text>
         </TouchableOpacity>

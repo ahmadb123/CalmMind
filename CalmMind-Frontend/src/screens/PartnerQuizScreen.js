@@ -1,224 +1,256 @@
-import React, { use, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-    View,
-    Text,
-    StyleSheet,
-    ScrollView,
-    ActivityIndicator,
-    TouchableOpacity,
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  ActivityIndicator,
+  TouchableOpacity,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AppFooter from '../components/AppFooter';
-import { fetchPartnerStyleQuizQuestions } from '../api/PartnerQuizApi';
+import { fetchPartnerStyleQuizQuestions, submitPartnerStyleQuiz } from '../api/PartnerQuizApi';
 import ProgressBar from '../components/ProgressBar';
 
+function PartnerQuizScreen({ route, navigation }) {
+  const { user } = route.params || {};
 
-function PartnerQuizScreen({navigation}){
-    const [quiz, setQuiz] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [err, setError] = useState(false);
-    const [currentIndex, setCurrentIndex] = useState(0);
-    const [answers, setAnswers] = useState({});
-    const labels = ['AVOIDANT', 'SECURE', 'ANXIOUS'];
-    const scoringKey = {
-        'Very Untrue of them' : 1,
-        'Moderately true of them' : 2,
-        'Very true of them' : 3
-    };
-    const scores = Object.keys(scoringKey).map(key => scoringKey[key]);
-    useEffect(() => {
-        loadQuiz();
-    }, []);
+  const [quiz, setQuiz] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [err, setError] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [answers, setAnswers] = useState({});
 
-    // load quiz:
-    const loadQuiz = async () => {
-        try{
-            const data = await fetchPartnerStyleQuizQuestions();
-            if(!data){
-                setError(true);
-            }else{
-                setQuiz(data);
-            }
-        }catch(err){
-            setError(true);
-        }finally{
-            setLoading(false);
-        }
-    };
-    
-    const handleNext = () => {
-        if(currentIndex < quiz.length - 1){
-            setCurrentIndex(i => i + 1);
-        }
-    };
+  const scores = [1, 2, 3];
 
-    const handlePrevious = () => {
-        if(currentIndex > 0){
-            setCurrentIndex(i => i - 1);
-        }
-    };
+  useEffect(() => {
+    loadQuiz();
+  }, []);
 
-    const handleAnswer = (value) =>{
-        setAnswers(prevAnswers => ({
-            ...prevAnswers,
-            [currentIndex]: value,
-        }));
+  /* ===================== LOAD QUIZ ===================== */
+
+  const loadQuiz = async () => {
+    try {
+      const data = await fetchPartnerStyleQuizQuestions();
+      if (!data || data.length === 0) {
+        setError(true);
+      } else {
+        setQuiz(data);
+      }
+    } catch (e) {
+      console.error(e);
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /* ===================== NAV ===================== */
+
+  const handleNext = () => {
+    if (currentIndex < quiz.length - 1) {
+      setCurrentIndex(i => i + 1);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (currentIndex > 0) {
+      setCurrentIndex(i => i - 1);
+    }
+  };
+
+  /* ===================== ANSWERS ===================== */
+
+  const handleAnswer = value => {
+    setAnswers(prev => ({
+      ...prev,
+      [currentIndex]: value,
+    }));
+  };
+
+  /* ===================== SUBMIT ===================== */
+
+  const handleSubmit = async () => {
+    // ensure all answered
+    for (let i = 0; i < quiz.length; i++) {
+      if (!answers[i]) {
+        Alert.alert('Incomplete', 'Please answer all questions before submitting.');
+        return;
+      }
     }
 
-    if(loading){
-        return(
-            <SafeAreaView style={styles.center}>
-                <View style={styles.loadingContainer}>
-                    <ActivityIndicator size="large" color="#0000ff" />
-                    <Text style={styles.loadingText}>Loadin quiz...</Text>
-                </View>
-            </SafeAreaView>
-        );
+    const payload = [];
+    for (let i = 0; i < quiz.length; i++) {
+      payload.push({
+        questionId: quiz[i].questionId,
+        answerValue: answers[i],
+      });
     }
 
-
-    // adjust group labels.  if avoidant show group A.. 
-    const adjustLabels = (group) => {
-        switch(group){
-            case 'AVOIDANT':
-                return 'Group A';
-            case 'SECURE':
-                return 'Group B';
-            case 'ANXIOUS':
-                return 'Group C';
-            default:
-                return group;
-        }
+    try {
+      await submitPartnerStyleQuiz(user?.id, payload);
+      navigation.replace('PartnerStyleScreen', { user });
+    } catch (e) {
+      console.error(e);
+      Alert.alert('Error', 'Failed to submit quiz.');
     }
-    // filters:
-    const currentGroupQuiz = quiz?.[currentIndex];
-    const isFirstQuestion = currentIndex === 0;
-    const isLastQuestion = currentIndex === quiz.length - 1;
-    const isLastQuestionPerGroupQuiz = currentGroupQuiz?.questionNum === 11;
+  };
 
-    const showScore = () => {
-        if(currentGroupQuiz?.questionNum >= 11){
-            /* show the GROUP TOTAL SCORE */
-            return (
-                <Text style={styles.center}>
-                    Group {adjustLabels(currentGroupQuiz.group)} Total Score: 
-                </Text>
-            );
-        }
-    }
+  /* ===================== STATES ===================== */
 
-    if(err || quiz.length === 0){
-        return (
-            <SafeAreaView style={styles.center}>
-                <Text style={styles.errorText}>
-                    No quiz available at the moment.
-                </Text>
-            </SafeAreaView>
-        );
-    }
-    return(
-        <SafeAreaView style={styles.safeArea}>
-            <View style={styles.container}>
-                <ProgressBar 
-                    currentGroupQuiz={currentIndex + 1}
-                    totalQuestions={quiz.length}
-                />
-                <View style={styles.container}>
-                    <SafeAreaView style={styles.container}>
-                            {/* show group first */}
-                            {currentGroupQuiz?.group && (
-                                <View style={styles.groupContainer}>
-                                    <Text style={styles.groupText}>
-                                        {adjustLabels(currentGroupQuiz.group)}
-                                    </Text>
-                                </View>
-                            )}  
-                    </SafeAreaView>
-                </View>
-                <View style={styles.questionContainer}>
-                    <ScrollView style={styles.scrollView}>
-                        {currentGroupQuiz && (
-                            <Text style={styles.questionText}>
-                               {currentGroupQuiz.questionNum}. {currentGroupQuiz.questionText}
-                            </Text>
-                        )}
-                        {currentGroupQuiz?.descriptions.map((desc, index)=> {
-                            return(
-                                <Text key={index} style={styles.questionDescription}>
-                                    {desc}
-                                </Text>
-                            )
-                        })}
-                    </ScrollView>
-                </View>
-                <View style={styles.scoreContainer}>
-                    <ScrollView style={styles.scrollView}>
-                        {/* only show score options: 1,2,3 */}
-                        <View style={styles.scoreContainer}>
-                        <Text style={styles.scoreTitle}>Score</Text>
-
-                        <View style={styles.scoreButtons}>
-                            {scores.map(score => (
-                            <TouchableOpacity
-                                key={score}
-                                onPress={() => handleAnswer(score)}
-                                style={[
-                                styles.scoreButton,
-                                answers[currentIndex] === score && styles.scoreButtonActive,
-                                ]}
-                                accessibilityRole="button"
-                                accessibilityLabel={`Select score ${score}`}
-                            >
-                                <Text
-                                style={[
-                                    styles.scoreButtonText,
-                                    answers[currentIndex] === score && styles.scoreButtonTextActive,
-                                ]}
-                                >
-                                {score}
-                                </Text>
-                            </TouchableOpacity>
-                            ))}
-                        </View>
-                        </View>
-                    </ScrollView>
-                </View>
-                {isLastQuestionPerGroupQuiz &&  showScore() (
-                )}
-            </View>
-        <AppFooter navigation={navigation} />
-        </SafeAreaView>
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.center}>
+        <ActivityIndicator size="large" color="#457B9D" />
+      </SafeAreaView>
     );
+  }
+
+  if (err || quiz.length === 0) {
+    return (
+      <SafeAreaView style={styles.center}>
+        <Text style={styles.errorText}>No quiz available.</Text>
+      </SafeAreaView>
+    );
+  }
+
+  const currentQuestion = quiz[currentIndex];
+  const isLast = currentIndex === quiz.length - 1;
+
+  /* ===================== UI ===================== */
+
+  return (
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        <ProgressBar
+          currentQuestion={currentIndex + 1}
+          totalQuestions={quiz.length}
+        />
+
+        {/* GROUP */}
+        <View style={styles.groupContainer}>
+          <Text style={styles.groupText}>{currentQuestion.group}</Text>
+        </View>
+
+        {/* QUESTION */}
+        <ScrollView style={styles.questionContainer}>
+          <Text style={styles.questionText}>
+            {currentQuestion.questionNum}. {currentQuestion.questionText}
+          </Text>
+
+          {currentQuestion.descriptions.map((d, i) => (
+            <Text key={i} style={styles.description}>
+              • {d}
+            </Text>
+          ))}
+        </ScrollView>
+
+        {/* SCORES */}
+        <View style={styles.scoreButtons}>
+          {scores.map(score => (
+            <TouchableOpacity
+              key={score}
+              onPress={() => handleAnswer(score)}
+              style={[
+                styles.scoreButton,
+                answers[currentIndex] === score && styles.scoreButtonActive,
+              ]}
+            >
+              <Text
+                style={[
+                  styles.scoreText,
+                  answers[currentIndex] === score && styles.scoreTextActive,
+                ]}
+              >
+                {score}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        {/* NAV BUTTONS */}
+        <View style={styles.navButtons}>
+          <TouchableOpacity
+            onPress={handlePrevious}
+            disabled={currentIndex === 0}
+            style={[styles.navBtn, currentIndex === 0 && styles.disabled]}
+          >
+            <Text>Back</Text>
+          </TouchableOpacity>
+
+          {!isLast ? (
+            <TouchableOpacity
+              onPress={handleNext}
+              disabled={!answers[currentIndex]}
+              style={[styles.navBtn, !answers[currentIndex] && styles.disabled]}
+            >
+              <Text>Next</Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              onPress={handleSubmit}
+              style={[styles.navBtn, styles.submitBtn]}
+            >
+              <Text style={{ color: '#FFF' }}>Submit</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      </View>
+
+      <AppFooter navigation={navigation} />
+    </SafeAreaView>
+  );
 }
 
-const styles = StyleSheet.create({
-    safeArea: {
-        flex: 1,
-        backgroundColor: '#F5F5F5',
-    },
-    container: {
-        flex: 1,
-        padding: 20,
-    },
-    groupContainer: {
-        marginBottom: 12,   
-        alignItems: 'center',
-    },
-
-    groupText: {
-        fontSize: 18,
-        fontWeight: '700',
-        color: '#1D3557',   // dark, visible
-        textTransform: 'capitalize',
-    },
-    questionContainer: {
-        marginBottom: 12,
-    },
-    questionText: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: '#1D3557',
-    },
-});
-
 export default PartnerQuizScreen;
+
+/* ===================== STYLES ===================== */
+
+const styles = StyleSheet.create({
+  safeArea: { flex: 1, backgroundColor: '#F5F5F5' },
+  container: { flex: 1, padding: 20 },
+  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  errorText: { color: '#E63946' },
+
+  groupContainer: { alignItems: 'center', marginBottom: 10 },
+  groupText: { fontSize: 18, fontWeight: '700', color: '#1D3557' },
+
+  questionContainer: { marginBottom: 20 },
+  questionText: { fontSize: 16, fontWeight: '600', marginBottom: 10 },
+  description: { fontSize: 14, color: '#555', marginBottom: 6 },
+
+  scoreButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 20,
+  },
+  scoreButton: {
+    borderWidth: 2,
+    borderColor: '#457B9D',
+    padding: 16,
+    borderRadius: 12,
+    width: 70,
+    alignItems: 'center',
+  },
+  scoreButtonActive: { backgroundColor: '#457B9D' },
+  scoreText: { fontSize: 16 },
+  scoreTextActive: { color: '#FFF' },
+
+  navButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  navBtn: {
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    borderRadius: 20,
+    backgroundColor: '#A8DADC',
+  },
+  submitBtn: {
+    backgroundColor: '#457B9D',
+  },
+  disabled: {
+    opacity: 0.4,
+  },
+});

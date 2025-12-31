@@ -4,6 +4,7 @@ com/calmmind/backend/config/PartnerStyleQuizQuestionDataInitalizer.class
 com/calmmind/backend/quiz/QuizResponse.class
 com/calmmind/backend/quiz/calculator/AttachmentStyleCalculator$StyleResult.class
 com/calmmind/backend/service/UserService.class
+com/calmmind/backend/model/PartnerStyleModel/PartnerStyleQuizResults.class
 com/calmmind/backend/dto/ResponseChatGPtDTO$Choices$Message.class
 com/calmmind/backend/dto/ResponseChatGPtDTO.class
 com/calmmind/backend/dto/AnxietyReliefFeatureDTO.class
@@ -18,6 +19,7 @@ com/calmmind/backend/controller/OpenAIController.class
 com/calmmind/backend/service/PartnerStyleTestService/PartnerStyleTestService.class
 com/calmmind/backend/AnxietyFeature/ToolUsageLog.class
 com/calmmind/backend/model/QuizDimension.class
+com/calmmind/backend/dto/PartnerStyleQuizSubmissionDTO.class
 com/calmmind/backend/AnxietyFeature/AnxietyReliefFeature.class
 com/calmmind/backend/service/AnxietyReliefToolFeatureService.class
 com/calmmind/backend/repository/ReminderTimeRepository.class
@@ -43,7 +45,6 @@ com/calmmind/backend/repository/QuizResponseRepository.class
 com/calmmind/backend/model/Affirmation.class
 com/calmmind/backend/repository/PartnerAttachmentStyleTestRepo/PartnerStyleQuizQuestionRepository.class
 com/calmmind/backend/quiz/AvoidanceScoringStrategy.class
-com/calmmind/backend/dto/PartnerStyleQuizResponseDTO.class
 com/calmmind/backend/quiz/Quiz.class
 com/calmmind/backend/repository/UserRepository.class
 com/calmmind/backend/service/IAffirmationService.class
@@ -68,6 +69,7 @@ com/calmmind/backend/service/IUserService.class
 com/calmmind/backend/service/RemindersAndNotesService.class
 com/calmmind/backend/dto/RequestChatGPtDTO.class
 com/calmmind/backend/controller/PartnerStyleQuizController.class
+com/calmmind/backend/dto/PartnerStyleQuizResultsDTO.class
 com/calmmind/backend/service/OpenAIService.class
 com/calmmind/backend/model/RemindersAndNotes$SetOptions.class
 com/calmmind/backend/service/IQuizService.class

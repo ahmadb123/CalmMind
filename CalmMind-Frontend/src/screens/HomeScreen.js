@@ -174,7 +174,7 @@ function HomeScreen({ route, navigation }) {
 
             <TouchableOpacity
               style={styles.primaryButton}
-              onPress={() => navigation.navigate('PartnerStyleScreen')}
+              onPress={() => navigation.navigate('PartnerStyleScreen', {user})}
             >
               <Text style={styles.primaryButtonText}>Partner Style →</Text>
             </TouchableOpacity>
