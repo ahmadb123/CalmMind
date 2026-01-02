@@ -143,10 +143,20 @@ function UserStyleQuizScreen({ route, navigation }) {
             
             console.log('Results after submit:', results); // Debug
             
+            const styleMap = {
+                'A': 'ANXIOUS',
+                'B': 'SECURE',
+                'C': 'AVOIDANT'
+            };
+
+            const updaterUser = {
+                ...user, 
+                attachmentStyle: styleMap[results.style] || results.style
+            };
             setQuizResults(results);
             setShowingQuiz(false);
             setHasResults(true);
-            console.log('State updated - should show results');
+            navigation.setParams({user: updaterUser});
         } catch (error) {
             Alert.alert('Error', 'Failed to submit quiz. Please try again later.');
             console.error(error);
