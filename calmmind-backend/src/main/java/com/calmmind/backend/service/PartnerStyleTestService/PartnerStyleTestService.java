@@ -9,25 +9,32 @@ import com.calmmind.backend.model.PartnerStyleModel.PartnerStyleQuizQuestion;
 import com.calmmind.backend.model.PartnerStyleModel.PartnerStyleQuizResponse;
 import com.calmmind.backend.repository.PartnerAttachmentStyleTestRepo.PartnerStyleQuizQuestionRepository;
 import com.calmmind.backend.repository.PartnerAttachmentStyleTestRepo.PartnerStyleQuizResponseRepository;
+import com.calmmind.backend.repository.PartnerAttachmentStyleTestRepo.PartnerStyleQuestionGroupRepository;
 import com.calmmind.backend.repository.UserRepository;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.HashSet;
 
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collection;
 @Service
 public class PartnerStyleTestService implements IPartnerStyleTestService {
     private final PartnerStyleQuizQuestionRepository partnerQuizRepo;
     private final PartnerStyleQuizResponseRepository partnerQuizResponseRepo;
+    private final PartnerStyleQuestionGroupRepository partnerStyleGroupRepo;
     private final UserRepository userRepository;
-
+    private static final int SCORING_KEY_DOMINANT = 23;
     public PartnerStyleTestService(PartnerStyleQuizQuestionRepository partnerQuizRepo,
                                     PartnerStyleQuizResponseRepository partnerQuizResponseRepo,
+                                    PartnerStyleQuestionGroupRepository partnerStyleGroupRepo,
                                     UserRepository userRepository) {
         this.partnerQuizRepo = partnerQuizRepo;
         this.partnerQuizResponseRepo = partnerQuizResponseRepo;
+        this.partnerStyleGroupRepo = partnerStyleGroupRepo;
         this.userRepository = userRepository;
     }
 
@@ -92,16 +99,47 @@ public class PartnerStyleTestService implements IPartnerStyleTestService {
             PartnerStyleQuestionGroup.Groups group = r.getQuestion().getQuestionGroup().getGroupName();
             groupScores.put(group, groupScores.get(group) + r.getAnswerValue());
         }
+        // determine style
+        PartnerStyleQuestionGroup.Groups dominantGroup =
+                        calculatePartnerStyle(groupScores);
+        int dominantScore = dominantGroup != null ? groupScores.get(dominantGroup) : 0 ;
 
-        // determine dominant style
-        PartnerStyleQuestionGroup.Groups dominant = null;
+        String scoringKeyDesc = null;
+        if(dominantGroup != null && dominantScore >= SCORING_KEY_DOMINANT){
+            scoringKeyDesc = 
+                    partnerStyleGroupRepo
+                    .findByGroupName(dominantGroup)
+                    .orElseThrow()
+                    .getScoringKeyDesc();
+        }
+        return new PartnerStyleQuizResultsDTO(groupScores,dominantGroup, scoringKeyDesc);
+    }
+
+    // private helper to calculate and return accurate style:
+    private PartnerStyleQuestionGroup.Groups calculatePartnerStyle(HashMap<PartnerStyleQuestionGroup.Groups, Integer> results){
+        if(hasEqualGroupScores(results)){
+            // proceed to golden rule for better assessment:
+            return null; // return null for now
+        }
+        // find highest
+        PartnerStyleQuestionGroup.Groups style = null;
         int highest = Integer.MIN_VALUE;
-        for(Map.Entry<PartnerStyleQuestionGroup.Groups, Integer> entry : groupScores.entrySet()){
-            if(entry.getValue() > highest){
+        for (Map.Entry<PartnerStyleQuestionGroup.Groups, Integer> entry : results.entrySet()) {
+            if (entry.getValue() > highest) {
                 highest = entry.getValue();
-                dominant = entry.getKey();
+                style = entry.getKey();
             }
         }
-        return new PartnerStyleQuizResultsDTO(groupScores,dominant);
+        return style;
+    }
+    // private function helper checks if 2 groups results are above 23: proceed to golden rules for better assessment
+    private boolean hasEqualGroupScores(HashMap<PartnerStyleQuestionGroup.Groups, Integer> results){
+        Set<Integer> seen = new HashSet<>();
+        for(Integer score : results.values()){
+            if(!seen.add(score)){ // if this fails then more than one group has the same value
+                return true;
+            }
+        }
+        return false;
     }
 }

@@ -1,8 +1,10 @@
 package com.calmmind.backend.controller;
 
-import com.calmmind.backend.service.IQuizService;
-import com.calmmind.backend.dto.QuizResultDTO;
-import com.calmmind.backend.model.QuizQuestion;
+import com.calmmind.backend.dto.UserStyleQuizDTO;
+import com.calmmind.backend.dto.UserStyleQuizResultsDTO;
+import com.calmmind.backend.dto.UserStyleQuizSubmissionDTO;
+import com.calmmind.backend.model.UserAttachmentStyle.UserStyleQuestion;
+import com.calmmind.backend.service.UserStyleQuizService.IUserStyleQuizService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,8 +17,8 @@ import java.util.Map;
 @CrossOrigin(origins = "*")
 
 public class QuizController {
-    private final IQuizService quizService;
-    public QuizController(IQuizService quizService){
+    private final IUserStyleQuizService quizService;
+    public QuizController(IUserStyleQuizService quizService){
         this.quizService = quizService;
     }
 
@@ -24,7 +26,7 @@ public class QuizController {
     @GetMapping("/takeQuiz")
     public ResponseEntity<?> getQuizQuestions(){
         try{
-            List<QuizQuestion> questions = quizService.getQuizQuestions();
+            List<UserStyleQuizDTO> questions = quizService.getQuiz();
             if(questions.isEmpty()){
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body("No quiz questions found");
@@ -37,12 +39,13 @@ public class QuizController {
     }
     /** POST SUBMT QUIZ  */
     @PostMapping("/submitQuiz/{userId}")
-    public ResponseEntity<?> submitQuiz(@PathVariable Long userId, @RequestBody Map<Integer,Integer> answers){
+    public ResponseEntity<?> submitQuiz(@PathVariable Long userId, @RequestBody List<UserStyleQuizSubmissionDTO> answers){
         try{
             if(userId == null || answers == null || answers.isEmpty()){
                 return ResponseEntity.badRequest().body("Invalid user ID or answers");
             }
-            return ResponseEntity.ok(quizService.submitQuiz(userId, answers));
+            quizService.submitQuiz(userId, answers);
+            return ResponseEntity.ok(answers);
         } catch (IllegalArgumentException e){
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e){
@@ -57,13 +60,16 @@ public class QuizController {
             if(userId == null){
                 return ResponseEntity.badRequest().body("Invalid user ID");
             }
-            QuizResultDTO result = quizService.getQuizResult(userId);
+            UserStyleQuizResultsDTO result = quizService.getResults(userId);
+            if(result == null){
+                return ResponseEntity.noContent().build();
+            }
             return ResponseEntity.ok(result);
         }catch(IllegalArgumentException e){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Error retrieving quiz results: " + e.getMessage());
+                .body("Error retrieving quiz result: " + e.getMessage());
         }
     }
 }

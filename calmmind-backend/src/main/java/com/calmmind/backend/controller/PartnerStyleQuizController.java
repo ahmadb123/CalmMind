@@ -54,7 +54,7 @@ public class PartnerStyleQuizController {
         try{
             PartnerStyleQuizResultsDTO results = partnerStyleTestService.getResults(userId);
             if(results == null){
-                return ResponseEntity.ok().body(null);
+                return ResponseEntity.noContent().build();
             }
             return ResponseEntity.ok(results);
         } catch (Exception e) {

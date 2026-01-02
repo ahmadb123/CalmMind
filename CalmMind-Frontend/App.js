@@ -48,7 +48,7 @@ function App(){
           options={{headerShown: false}}
         />
         <Stack.Screen 
-          name="Quiz"
+          name="QuizScreen"
           component={QuizScreen}
           options={{headerShown: false}}
         />

@@ -4,5 +4,6 @@ import com.calmmind.backend.model.PartnerStyleModel.PartnerStyleQuestionGroup;
 import java.util.HashMap;
 public record PartnerStyleQuizResultsDTO(
         HashMap<PartnerStyleQuestionGroup.Groups, Integer> groupScores,
-        PartnerStyleQuestionGroup.Groups dominantGroup
+        PartnerStyleQuestionGroup.Groups dominantGroup,
+        String scoringKeyDesc
 ) {}

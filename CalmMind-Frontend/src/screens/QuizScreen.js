@@ -9,59 +9,72 @@ import {
   ScrollView
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import ProgressBar from '../components/ProgressBar';
-import QuestionCard from '../components/QuestionCard';
-import { fetchQuiz, submitQuiz, fetchQuizResults } from '../api/QuizApi';
+import { Ionicons } from '@expo/vector-icons';
+import { fetchUserStyleQuiz, submitUserStyleQuiz, getUserStyleQuizResults } from '../api/UserStyleQuizApi';
+import AppFooter from '../components/AppFooter';
+const QUESTIONS_PER_PAGE = 10;
 
-function QuizScreen({ route, navigation }) {
+function UserStyleQuizScreen({ route, navigation }) {
     const { user } = route.params || {};
-    if(!user){
+    
+    if (!user) {
         Alert.alert('Error', 'User not found. Please log in again.');
         navigation.navigate('Login');
         return null;
     }
+
     const [quizQuestions, setQuizQuestions] = useState([]);
-    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [answers, setAnswers] = useState({});
     const [quizLoading, setQuizLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
+    const [currentPage, setCurrentPage] = useState(0);
     
     const [hasResults, setHasResults] = useState(false);
     const [quizResults, setQuizResults] = useState(null);
     const [showingQuiz, setShowingQuiz] = useState(true);
 
     useEffect(() => {
-        const checkQuizStatus = async () => {
-            if(!user?.id) {
-                Alert.alert('Error', 'User not found. Please log in again.');
-                navigation.navigate('Login');
-                return;
-            }
-            setQuizLoading(true);
-            try{
-                const results = await fetchQuizResults(user.id);
-                // ✅ UPDATED: Check for primaryStyle instead of attachmentStyle
-                if(results && results.primaryStyle){
-                    setHasResults(true);
-                    setQuizResults(results);
-                    setShowingQuiz(false);
-                }
-                else{
-                    await loadQuiz();
-                }
-            }catch(error){
-                await loadQuiz();
-            }finally{
-                setQuizLoading(false);
-            }
-        };
         checkQuizStatus();
     }, []);
 
+    const checkQuizStatus = async () => {
+        if (!user?.id) {
+            Alert.alert('Error', 'User not found. Please log in again.');
+            navigation.navigate('Login');
+            return;
+        }
+        
+        setQuizLoading(true);
+        
+        try {
+            const results = await getUserStyleQuizResults(user.id);
+            
+            if (results && results.dominantOption) {
+                setHasResults(true);
+                setQuizResults(results);
+                setShowingQuiz(false);
+            } else {
+                await loadQuiz();
+            }
+        } catch (error) {
+            await loadQuiz();
+        } finally {
+            setQuizLoading(false);
+        }
+    };
+
     const loadQuiz = async () => {
         try {
-            const fetchedQuestions = await fetchQuiz();
+            const fetchedQuestions = await fetchUserStyleQuiz();
             setQuizQuestions(fetchedQuestions);
+            
+            // Initialize all answers to false
+            const initialAnswers = {};
+            fetchedQuestions.forEach(q => {
+                initialAnswers[q.questionId] = false;
+            });
+            setAnswers(initialAnswers);
+            
             setShowingQuiz(true);
         } catch (error) {
             Alert.alert('Error', 'Failed to load quiz questions. Please try again later.');
@@ -84,155 +97,140 @@ function QuizScreen({ route, navigation }) {
                     setHasResults(false);
                     setQuizResults(null);
                     setAnswers({});
-                    setCurrentQuestionIndex(0);
+                    setCurrentPage(0);
                     await loadQuiz();
                 },
             },
         ]);
     };
 
-    const handleAnswer = (questionId, answerValue) => {
-        setAnswers({ ...answers, [questionId]: answerValue });
+    const handleCheckboxToggle = (questionId) => {
+        setAnswers(prev => ({
+            ...prev,
+            [questionId]: !prev[questionId]
+        }));
     };
 
-    const handleNext = () => {
-        if (currentQuestionIndex < quizQuestions.length - 1) {
-            setCurrentQuestionIndex(currentQuestionIndex + 1);
+    const handleNextPage = () => {
+        if (currentPage < totalPages - 1) {
+            setCurrentPage(currentPage + 1);
         }
     };
 
-    const handlePrevious = () => {
-        if (currentQuestionIndex > 0) {
-            setCurrentQuestionIndex(currentQuestionIndex - 1);
+    const handlePreviousPage = () => {
+        if (currentPage > 0) {
+            setCurrentPage(currentPage - 1);
         }
     };
 
     const handleSubmit = async () => {
-        if (Object.keys(answers).length < quizQuestions.length) {
-            Alert.alert('Incomplete', 'Please answer all questions before submitting.');
-            return;
-        }
+        // Format answers for submission
+        const submissions = quizQuestions.map(q => ({
+            questionId: q.questionId,
+            answerValue: answers[q.questionId] || false
+        }));
         
         setSubmitting(true);
         
         try {
-            const result = await submitQuiz(user.id, answers);
+            await submitUserStyleQuiz(user.id, submissions);
             
-            Alert.alert('Success!', 'Quiz submitted successfully!', [
-                {
-                    text: 'View Results',
-                    // ✅ UPDATED: Use primaryStyle
-                    onPress: () => navigation.navigate('Home', { 
-                        user: { ...user, attachmentStyle: result.primaryStyle } 
-                    })
-                }
-            ]);
+            // Fetch the results
+            const results = await getUserStyleQuizResults(user.id);
+            setQuizResults(results);
+            setHasResults(true);
+            setShowingQuiz(false);
+            
+            Alert.alert('Success!', 'Quiz submitted successfully!');
         } catch (error) {
             Alert.alert('Error', 'Failed to submit quiz. Please try again later.');
-            console.log(error);
+            console.error(error);
         } finally {
             setSubmitting(false);
         }
+    };
+
+    // Render checkbox for specific column
+    const renderCheckboxForColumn = (question, column) => {
+        if (question.answerOption !== column) {
+            return <View style={styles.emptyCell} />;
+        }
+
+        const isChecked = answers[question.questionId];
+
+        return (
+            <TouchableOpacity
+                style={styles.checkboxCell}
+                onPress={() => handleCheckboxToggle(question.questionId)}
+                disabled={submitting}
+            >
+                <View style={[styles.checkbox, isChecked && styles.checkboxChecked]}>
+                    {isChecked && (
+                        <Ionicons name="checkmark" size={16} color="#FFF" />
+                    )}
+                </View>
+            </TouchableOpacity>
+        );
     };
 
     if (quizLoading) {
         return (
             <SafeAreaView style={styles.safeArea}>
                 <View style={styles.loadingContainer}>
-                    <ActivityIndicator size="large" color="#A8DADC" />
-                    <Text style={styles.loadingText}>Loading quiz questions...</Text>
+                    <ActivityIndicator size="large" color="#457B9D" />
+                    <Text style={styles.loadingText}>Loading quiz...</Text>
                 </View>
             </SafeAreaView>
         );
     }
 
-    // ✅ UPDATED: Enhanced results display with new fields
-    if(hasResults && !showingQuiz && quizResults){
+    // Results Display
+    if (hasResults && !showingQuiz && quizResults) {
         return (
             <SafeAreaView style={styles.safeArea}>
                 <ScrollView contentContainerStyle={styles.resultsContainer}>
-                    <Text style={styles.resultsTitle}>Your Quiz Results</Text>
+                    <Text style={styles.resultsTitle}>Your Attachment Style</Text>
                     
-                    {/* Primary Attachment Style */}
                     <View style={styles.resultCard}>
-                        <Text style={styles.resultLabel}>Primary Attachment Style</Text>
+                        <Text style={styles.resultLabel}>Your Style</Text>
                         <Text style={styles.resultValue}>
-                            {quizResults.primaryStyle?.replace('_', ' ') || 'N/A'}
+                            {quizResults.dominantOption === 'A' ? 'Anxious' :
+                             quizResults.dominantOption === 'B' ? 'Secure' :
+                             quizResults.dominantOption === 'C' ? 'Avoidant' : 'Unknown'}
                         </Text>
-                        {quizResults.primaryDescription && (
+                        
+                        {quizResults.interpretation && (
                             <Text style={styles.resultDescription}>
-                                {quizResults.primaryDescription}
+                                {quizResults.interpretation}
                             </Text>
                         )}
                     </View>
 
-                    {/* ✅ NEW: Secondary Style (if exists) */}
-                    {quizResults.secondaryStyle && (
-                        <View style={[styles.resultCard, styles.secondaryCard]}>
-                            <Text style={styles.resultLabel}>Secondary Tendency</Text>
-                            <Text style={styles.secondaryValue}>
-                                {quizResults.secondaryStyle.replace('_', ' ')}
-                            </Text>
-                            {quizResults.secondaryDescription && (
-                                <Text style={styles.resultDescription}>
-                                    {quizResults.secondaryDescription}
-                                </Text>
-                            )}
-                        </View>
-                    )}
-
-                    {/* ✅ NEW: Confidence Indicator */}
-                    <View style={styles.resultCard}>
-                        <Text style={styles.resultLabel}>Classification Confidence</Text>
-                        <View style={styles.confidenceContainer}>
-                            <View style={styles.confidenceBarBackground}>
-                                <View 
-                                    style={[
-                                        styles.confidenceBarFill, 
-                                        { 
-                                            width: `${quizResults.confidence || 0}%`,
-                                            backgroundColor: 
-                                                quizResults.confidence >= 85 ? '#2E7D32' :
-                                                quizResults.confidence >= 70 ? '#FFA726' :
-                                                '#FF6B6B'
-                                        }
-                                    ]} 
-                                />
-                            </View>
-                            <Text style={styles.confidenceText}>
-                                {Math.round(quizResults.confidence || 0)}%
+                    <View style={styles.scoresCard}>
+                        <Text style={styles.scoresTitle}>Score Breakdown</Text>
+                        
+                        <View style={styles.scoreRow}>
+                            <Text style={styles.scoreLabel}>Anxious (A)</Text>
+                            <Text style={styles.scoreValue}>
+                                {quizResults.columnScores?.A || 0}
                             </Text>
                         </View>
                         
-                        {/* ✅ NEW: Borderline warning */}
-                        {quizResults.isBorderline && (
-                            <View style={styles.borderlineWarning}>
-                                <Text style={styles.borderlineIcon}>⚠️</Text>
-                                <Text style={styles.borderlineText}>
-                                    Your results are borderline. Consider retaking the quiz for more clarity.
-                                </Text>
-                            </View>
-                        )}
-                    </View>
-
-                    {/* Dimensional Scores */}
-                    <View style={styles.scoresRow}>
-                        <View style={styles.scoreCard}>
-                            <Text style={styles.scoreLabel}>Anxiety</Text>
+                        <View style={styles.scoreRow}>
+                            <Text style={styles.scoreLabel}>Secure (B)</Text>
                             <Text style={styles.scoreValue}>
-                                {quizResults.anxietyScore?.toFixed(1) || 'N/A'}/7
+                                {quizResults.columnScores?.B || 0}
                             </Text>
                         </View>
-
-                        <View style={styles.scoreCard}>
-                            <Text style={styles.scoreLabel}>Avoidance</Text>
+                        
+                        <View style={styles.scoreRow}>
+                            <Text style={styles.scoreLabel}>Avoidant (C)</Text>
                             <Text style={styles.scoreValue}>
-                                {quizResults.avoidanceScore?.toFixed(1) || 'N/A'}/7
+                                {quizResults.columnScores?.C || 0}
                             </Text>
                         </View>
                     </View>
 
-                    {/* Action Buttons */}
                     <TouchableOpacity
                         style={styles.retakeButton}
                         onPress={handleRetakeQuiz}
@@ -242,18 +240,16 @@ function QuizScreen({ route, navigation }) {
 
                     <TouchableOpacity
                         style={styles.homeButton}
-                        onPress={() => navigation.navigate('Home', { 
-                            user: { ...user, attachmentStyle: quizResults.primaryStyle } 
-                        })}
+                        onPress={() => navigation.navigate('Home', { user })}
                     >
                         <Text style={styles.homeButtonText}>Go to Home</Text>
                     </TouchableOpacity>
-                    
                 </ScrollView>
             </SafeAreaView>
         );
     }
 
+    // Quiz Display
     if (!quizQuestions || quizQuestions.length === 0) {
         return (
             <SafeAreaView style={styles.safeArea}>
@@ -270,62 +266,127 @@ function QuizScreen({ route, navigation }) {
         );
     }
 
-    const currentQuestion = quizQuestions[currentQuestionIndex];
-    const isFirstQuestion = currentQuestionIndex === 0;
-    const isLastQuestion = currentQuestionIndex === quizQuestions.length - 1;
-    const isAnswered = answers[currentQuestion?.id] !== undefined;
+    // Pagination calculations
+    const totalPages = Math.ceil(quizQuestions.length / QUESTIONS_PER_PAGE);
+    const startIndex = currentPage * QUESTIONS_PER_PAGE;
+    const endIndex = Math.min(startIndex + QUESTIONS_PER_PAGE, quizQuestions.length);
+    const currentQuestions = quizQuestions.slice(startIndex, endIndex);
+    
+    const answeredCount = Object.values(answers).filter(a => a === true).length;
+    const isLastPage = currentPage === totalPages - 1;
 
     return (
         <SafeAreaView style={styles.safeArea}>
             <View style={styles.container}>
-                
-                <ProgressBar
-                    currentQuestion={currentQuestionIndex + 1}
-                    totalQuestions={quizQuestions.length}
-                />
-                
-                <QuestionCard
-                    question={currentQuestion}
-                    value={answers[currentQuestion.id]} 
-                    onAnswer={(val) => handleAnswer(currentQuestion.id, val)}
-                    disabled={submitting}
-                />
-                
-                <View style={styles.navigationButtons}>
-                    
-                    {!isFirstQuestion && (
-                        <TouchableOpacity 
-                            onPress={handlePrevious}
-                            style={styles.navButton}
-                        >
-                            <Text style={styles.navButtonText}>← Previous</Text>
-                        </TouchableOpacity>
-                    )}
-                    
-                    {!isLastQuestion && (
+                {/* Header */}
+                <View style={styles.header}>
+                    <Text style={styles.title}>Attachment Style Quiz</Text>
+                    <Text style={styles.subtitle}>
+                        Check the box if the statement is TRUE for you.
+                    </Text>
+                </View>
+
+                {/* Progress Indicator */}
+                <View style={styles.progressContainer}>
+                    <Text style={styles.progressText}>
+                        Page {currentPage + 1} of {totalPages}
+                    </Text>
+                    <Text style={styles.progressSubtext}>
+                        {answeredCount} of {quizQuestions.length} answered
+                    </Text>
+                </View>
+
+                {/* Instructions Card */}
+                <View style={styles.instructionsCard}>
+                    <Ionicons name="information-circle" size={18} color="#457B9D" />
+                    <Text style={styles.instructionsText}>
+                        Check the small box next to each statement that is TRUE for you. (If the answer is untrue, don't mark the item at all.)
+                    </Text>
+                </View>
+
+                {/* Questions Table */}
+                <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+                    {/* Table Header */}
+                    <View style={styles.tableHeader}>
+                        <View style={styles.numberCol}>
+                            <Text style={styles.headerText}>#</Text>
+                        </View>
+                        <View style={styles.statementCol}>
+                            <Text style={styles.headerText}>Statement</Text>
+                        </View>
+                        <View style={styles.checkCol}>
+                            <Text style={styles.headerText}>A</Text>
+                        </View>
+                        <View style={styles.checkCol}>
+                            <Text style={styles.headerText}>B</Text>
+                        </View>
+                        <View style={styles.checkCol}>
+                            <Text style={styles.headerText}>C</Text>
+                        </View>
+                    </View>
+
+                    {/* Question Rows */}
+                    {currentQuestions.map((question, index) => {
+                        const globalIndex = startIndex + index;
+                        return (
+                            <View key={question.questionId} style={styles.questionRow}>
+                                <View style={styles.numberCol}>
+                                    <Text style={styles.questionNumber}>{globalIndex + 1}</Text>
+                                </View>
+                                
+                                <View style={styles.statementCol}>
+                                    <Text style={styles.questionText}>{question.questionText}</Text>
+                                </View>
+                                
+                                <View style={styles.checkCol}>
+                                    {renderCheckboxForColumn(question, 'A')}
+                                </View>
+                                
+                                <View style={styles.checkCol}>
+                                    {renderCheckboxForColumn(question, 'B')}
+                                </View>
+                                
+                                <View style={styles.checkCol}>
+                                    {renderCheckboxForColumn(question, 'C')}
+                                </View>
+                            </View>
+                        );
+                    })}
+                </ScrollView>
+
+                {/* Navigation Buttons */}
+                <View style={styles.navigationContainer}>
+                    <TouchableOpacity
+                        style={[styles.navButton, currentPage === 0 && styles.navButtonDisabled]}
+                        onPress={handlePreviousPage}
+                        disabled={currentPage === 0}
+                    >
+                        <Ionicons name="chevron-back" size={20} color="#FFF" />
+                        <Text style={styles.navButtonText}>Previous</Text>
+                    </TouchableOpacity>
+
+                    {!isLastPage ? (
                         <TouchableOpacity
-                            onPress={handleNext}
-                            style={[styles.navButton, styles.primaryButton]}
-                            disabled={!isAnswered}
+                            style={[styles.navButton, styles.navButtonPrimary]}
+                            onPress={handleNextPage}
                         >
-                            <Text style={styles.navButtonText}>Next →</Text>
+                            <Text style={styles.navButtonText}>Next</Text>
+                            <Ionicons name="chevron-forward" size={20} color="#FFF" />
                         </TouchableOpacity>
-                    )}
-                    
-                    {isLastQuestion && (
+                    ) : (
                         <TouchableOpacity
+                            style={[styles.navButton, styles.submitNavButton, submitting && styles.navButtonDisabled]}
                             onPress={handleSubmit}
-                            style={[styles.navButton, styles.submitButton]}
-                            disabled={!isAnswered || submitting}
+                            disabled={submitting}
                         >
                             <Text style={styles.navButtonText}>
                                 {submitting ? 'Submitting...' : 'Submit Quiz'}
                             </Text>
                         </TouchableOpacity>
                     )}
-                    
                 </View>
             </View>
+            <AppFooter />
         </SafeAreaView>
     );
 }
@@ -337,18 +398,182 @@ const styles = StyleSheet.create({
     },
     container: {
         flex: 1,
-        padding: 20,
     },
     loadingContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+        padding: 20,
     },
     loadingText: {
         marginTop: 10,
         fontSize: 16,
         color: '#666',
     },
+    header: {
+        padding: 20,
+        paddingTop: 10,
+        paddingBottom: 15,
+        backgroundColor: '#FFF',
+        borderBottomWidth: 1,
+        borderBottomColor: '#E0E0E0',
+    },
+    title: {
+        fontSize: 22,
+        fontWeight: 'bold',
+        color: '#1D3557',
+        marginBottom: 6,
+    },
+    subtitle: {
+        fontSize: 13,
+        color: '#666',
+        lineHeight: 18,
+    },
+    progressContainer: {
+        backgroundColor: '#E3F2FD',
+        padding: 12,
+        marginHorizontal: 20,
+        marginTop: 15,
+        marginBottom: 10,
+        borderRadius: 8,
+        alignItems: 'center',
+    },
+    progressText: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#1D3557',
+    },
+    progressSubtext: {
+        fontSize: 13,
+        color: '#666',
+        marginTop: 4,
+    },
+    instructionsCard: {
+        flexDirection: 'row',
+        backgroundColor: '#FFF9E6',
+        padding: 12,
+        marginHorizontal: 20,
+        marginBottom: 15,
+        borderRadius: 8,
+        borderLeftWidth: 4,
+        borderLeftColor: '#F4A261',
+        alignItems: 'center',
+    },
+    instructionsText: {
+        flex: 1,
+        marginLeft: 10,
+        fontSize: 13,
+        color: '#555',
+        lineHeight: 18,
+    },
+    scrollView: {
+        flex: 1,
+        marginHorizontal: 20,
+    },
+    scrollContent: {
+        paddingBottom: 20,
+    },
+    tableHeader: {
+        flexDirection: 'row',
+        backgroundColor: '#457B9D',
+        paddingVertical: 10,
+        paddingHorizontal: 10,
+        borderTopLeftRadius: 8,
+        borderTopRightRadius: 8,
+        alignItems: 'center',
+    },
+    numberCol: {
+        width: 35,
+        alignItems: 'center',
+    },
+    statementCol: {
+        flex: 1,
+        paddingHorizontal: 8,
+    },
+    checkCol: {
+        width: 45,
+        alignItems: 'center',
+    },
+    headerText: {
+        color: '#FFF',
+        fontSize: 13,
+        fontWeight: '600',
+    },
+    questionRow: {
+        flexDirection: 'row',
+        backgroundColor: '#FFF',
+        paddingVertical: 12,
+        paddingHorizontal: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: '#E0E0E0',
+        alignItems: 'center',
+        minHeight: 70,
+    },
+    questionNumber: {
+        fontSize: 13,
+        fontWeight: '600',
+        color: '#666',
+    },
+    questionText: {
+        fontSize: 14,
+        color: '#333',
+        lineHeight: 20,
+    },
+    checkboxCell: {
+        padding: 4,
+    },
+    emptyCell: {
+        width: 26,
+        height: 26,
+    },
+    checkbox: {
+        width: 26,
+        height: 26,
+        borderRadius: 5,
+        borderWidth: 2,
+        borderColor: '#457B9D',
+        backgroundColor: '#FFF',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    checkboxChecked: {
+        backgroundColor: '#457B9D',
+        borderColor: '#457B9D',
+    },
+    navigationContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        paddingHorizontal: 20,
+        paddingVertical: 15,
+        backgroundColor: '#FFF',
+        borderTopWidth: 1,
+        borderTopColor: '#E0E0E0',
+    },
+    navButton: {
+        flexDirection: 'row',
+        backgroundColor: '#A8DADC',
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        borderRadius: 8,
+        alignItems: 'center',
+        gap: 8,
+    },
+    navButtonPrimary: {
+        backgroundColor: '#457B9D',
+    },
+    submitNavButton: {
+        backgroundColor: '#2E7D32',
+    },
+    navButtonDisabled: {
+        backgroundColor: '#CCCCCC',
+        opacity: 0.6,
+    },
+    navButtonText: {
+        color: '#FFF',
+        fontSize: 15,
+        fontWeight: '600',
+    },
+    // Results styles
     resultsContainer: {
         padding: 20,
         alignItems: 'center',
@@ -363,119 +588,67 @@ const styles = StyleSheet.create({
     resultCard: {
         backgroundColor: '#FFF',
         width: '100%',
+        padding: 25,
+        borderRadius: 15,
+        marginBottom: 20,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+        alignItems: 'center',
+    },
+    resultLabel: {
+        fontSize: 14,
+        color: '#666',
+        marginBottom: 8,
+        textTransform: 'uppercase',
+        letterSpacing: 1,
+    },
+    resultValue: {
+        fontSize: 32,
+        fontWeight: 'bold',
+        color: '#457B9D',
+        marginBottom: 15,
+    },
+    resultDescription: {
+        fontSize: 15,
+        color: '#555',
+        lineHeight: 24,
+        textAlign: 'center',
+    },
+    scoresCard: {
+        backgroundColor: '#FFF',
+        width: '100%',
         padding: 20,
         borderRadius: 15,
-        marginBottom: 15,
+        marginBottom: 20,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 4,
         elevation: 3,
     },
-    // ✅ NEW: Secondary style card styling
-    secondaryCard: {
-        backgroundColor: '#F3E5F5',
-        borderWidth: 2,
-        borderColor: '#AB47BC',
-    },
-    resultLabel: {
-        fontSize: 14,
-        color: '#666',
-        marginBottom: 5,
-        fontWeight: '500',
-    },
-    resultValue: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        color: '#1D3557',
-        textTransform: 'capitalize',
-        marginBottom: 10,
-    },
-    // ✅ NEW: Secondary value styling
-    secondaryValue: {
-        fontSize: 20,
-        fontWeight: '600',
-        color: '#AB47BC',
-        textTransform: 'capitalize',
-        marginBottom: 10,
-    },
-    // ✅ NEW: Description text
-    resultDescription: {
-        fontSize: 14,
-        color: '#555',
-        lineHeight: 20,
-        marginTop: 8,
-        fontStyle: 'italic',
-    },
-    // ✅ NEW: Confidence display
-    confidenceContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginTop: 10,
-    },
-    confidenceBarBackground: {
-        flex: 1,
-        height: 24,
-        backgroundColor: '#E0E0E0',
-        borderRadius: 12,
-        overflow: 'hidden',
-        marginRight: 15,
-    },
-    confidenceBarFill: {
-        height: '100%',
-        borderRadius: 12,
-    },
-    confidenceText: {
+    scoresTitle: {
         fontSize: 18,
-        fontWeight: 'bold',
+        fontWeight: '600',
         color: '#1D3557',
-        minWidth: 50,
-    },
-    // ✅ NEW: Borderline warning
-    borderlineWarning: {
-        flexDirection: 'row',
-        backgroundColor: '#FFF3E0',
-        padding: 12,
-        borderRadius: 8,
-        marginTop: 12,
-        alignItems: 'center',
-        borderLeftWidth: 4,
-        borderLeftColor: '#FF6B6B',
-    },
-    borderlineIcon: {
-        fontSize: 20,
-        marginRight: 10,
-    },
-    borderlineText: {
-        flex: 1,
-        fontSize: 13,
-        color: '#666',
-        lineHeight: 18,
-    },
-    // ✅ NEW: Dimensional scores side-by-side
-    scoresRow: {
-        flexDirection: 'row',
-        width: '100%',
-        justifyContent: 'space-between',
         marginBottom: 15,
     },
-    scoreCard: {
-        backgroundColor: '#E3F2FD',
-        width: '48%',
-        padding: 15,
-        borderRadius: 12,
-        alignItems: 'center',
-        borderWidth: 2,
-        borderColor: '#42A5F5',
+    scoreRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        paddingVertical: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: '#E0E0E0',
     },
     scoreLabel: {
-        fontSize: 14,
-        color: '#666',
-        marginBottom: 5,
+        fontSize: 16,
+        color: '#555',
     },
     scoreValue: {
-        fontSize: 20,
-        fontWeight: 'bold',
+        fontSize: 16,
+        fontWeight: '600',
         color: '#1D3557',
     },
     retakeButton: {
@@ -483,7 +656,7 @@ const styles = StyleSheet.create({
         paddingVertical: 15,
         paddingHorizontal: 40,
         borderRadius: 10,
-        marginTop: 30,
+        marginTop: 10,
         width: '100%',
         alignItems: 'center',
     },
@@ -506,31 +679,6 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: '600',
     },
-    navigationButtons: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        paddingHorizontal: 20,
-        paddingVertical: 20,
-    },
-    navButton: {
-        backgroundColor: '#A8DADC',
-        paddingVertical: 15,
-        paddingHorizontal: 30,
-        borderRadius: 10,
-        minWidth: 120,
-        alignItems: 'center',
-    },
-    primaryButton: {
-        backgroundColor: '#457B9D',
-    },
-    submitButton: {
-        backgroundColor: '#2E7D32',
-    },
-    navButtonText: {
-        color: '#FFF',
-        fontSize: 16,
-        fontWeight: '600',
-    },
 });
 
-export default QuizScreen;
+export default UserStyleQuizScreen;

@@ -21,19 +21,14 @@ public class PartnerStyleQuestionGroup{
     @Column(nullable = false, length = 50)
     private Groups groupName;
 
-    @Column(name = "min_score", nullable = false)
-    private Integer minScore;
-
-    @Column(name = "max_score", nullable = false)
-    private Integer maxScore;
-
+    @Column(columnDefinition = "TEXT")
+    private String scoringKeyDesc;
 
     public PartnerStyleQuestionGroup(){}
 
-    public PartnerStyleQuestionGroup(Groups groupName, Integer minScore, Integer maxScore) {
+    public PartnerStyleQuestionGroup(Groups groupName, String scoringKeyDesc) {
         this.groupName = groupName;
-        this.minScore = minScore;
-        this.maxScore = maxScore;
+        this.scoringKeyDesc = scoringKeyDesc;
     }
 
     /* Getters and Setters */
@@ -54,22 +49,13 @@ public class PartnerStyleQuestionGroup{
         this.groupName = groupName;
     }
 
-    public Integer getMinScore() {
-        return minScore;
+    public String getScoringKeyDesc(){
+        return scoringKeyDesc;
     }
 
-    public void setMinScore(Integer minScore) {
-        this.minScore = minScore;
+    public void setScoringKeyDesc(String scoringKeyDesc){
+        this.scoringKeyDesc = scoringKeyDesc;
     }
-
-    public Integer getMaxScore() {
-        return maxScore;
-    }
-
-    public void setMaxScore(Integer maxScore) {
-        this.maxScore = maxScore;
-    }
-
     // inner enum class
     public enum Groups {
         AVOIDANT,
