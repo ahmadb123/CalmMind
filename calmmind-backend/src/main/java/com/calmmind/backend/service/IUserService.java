@@ -9,5 +9,6 @@ public interface IUserService {
     User getUserByUsername(String username);
     User getUserById(Long id);
     boolean isUsernameAvailable(String username);
+    void updateUserAttachmentStyle(Long userId, String quizStyle);
     void deleteUser(Long id);
 }

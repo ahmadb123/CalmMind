@@ -2,6 +2,7 @@ com/calmmind/backend/model/PartnerStyleModel/PartnerStyleQuestionGroup$Groups.cl
 com/calmmind/backend/repository/AnxietyReliefFeatureRepo/ToolUsageLogRepository.class
 com/calmmind/backend/config/PartnerStyleQuizQuestionDataInitalizer.class
 com/calmmind/backend/repository/UserStyleQuizRepo/UserStyleQuestionRepository.class
+com/calmmind/backend/model/UserAttachmentStyle/UserStyleQuizResults.class
 com/calmmind/backend/service/UserService.class
 com/calmmind/backend/dto/UserStyleQuizDTO.class
 com/calmmind/backend/dto/ResponseChatGPtDTO$Choices$Message.class
@@ -52,6 +53,7 @@ com/calmmind/backend/model/AttachmentStyle.class
 com/calmmind/backend/CalmMindBackendApplication.class
 com/calmmind/backend/dto/LoginRequest.class
 com/calmmind/backend/config/UserStyleQuizDataInitializer.class
+com/calmmind/backend/repository/UserStyleQuizRepo/UserStyleQuizResultsRepository.class
 com/calmmind/backend/dto/UserStyleQuizResultsDTO.class
 com/calmmind/backend/controller/AnxietyToolFeatureController.class
 com/calmmind/backend/model/UserAttachmentStyle/UserStyleQuizResponse.class

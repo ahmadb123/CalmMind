@@ -12,6 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { fetchUserStyleQuiz, submitUserStyleQuiz, getUserStyleQuizResults } from '../api/UserStyleQuizApi';
 import AppFooter from '../components/AppFooter';
+
 const QUESTIONS_PER_PAGE = 10;
 
 function UserStyleQuizScreen({ route, navigation }) {
@@ -49,7 +50,8 @@ function UserStyleQuizScreen({ route, navigation }) {
         try {
             const results = await getUserStyleQuizResults(user.id);
             
-            if (results && results.dominantOption) {
+            // ✅ FIX: Check for "style" not "dominantOption"
+            if (results && results.style) {
                 setHasResults(true);
                 setQuizResults(results);
                 setShowingQuiz(false);
@@ -112,6 +114,7 @@ function UserStyleQuizScreen({ route, navigation }) {
     };
 
     const handleNextPage = () => {
+        const totalPages = Math.ceil(quizQuestions.length / QUESTIONS_PER_PAGE);
         if (currentPage < totalPages - 1) {
             setCurrentPage(currentPage + 1);
         }
@@ -137,11 +140,13 @@ function UserStyleQuizScreen({ route, navigation }) {
             
             // Fetch the results
             const results = await getUserStyleQuizResults(user.id);
-            setQuizResults(results);
-            setHasResults(true);
-            setShowingQuiz(false);
             
-            Alert.alert('Success!', 'Quiz submitted successfully!');
+            console.log('Results after submit:', results); // Debug
+            
+            setQuizResults(results);
+            setShowingQuiz(false);
+            setHasResults(true);
+            console.log('State updated - should show results');
         } catch (error) {
             Alert.alert('Error', 'Failed to submit quiz. Please try again later.');
             console.error(error);
@@ -184,7 +189,7 @@ function UserStyleQuizScreen({ route, navigation }) {
         );
     }
 
-    // Results Display
+    // ✅ Results Display - MUST come before quiz display
     if (hasResults && !showingQuiz && quizResults) {
         return (
             <SafeAreaView style={styles.safeArea}>
@@ -193,15 +198,17 @@ function UserStyleQuizScreen({ route, navigation }) {
                     
                     <View style={styles.resultCard}>
                         <Text style={styles.resultLabel}>Your Style</Text>
+                        {/* ✅ FIX: Use "style" not "dominantOption" */}
                         <Text style={styles.resultValue}>
-                            {quizResults.dominantOption === 'A' ? 'Anxious' :
-                             quizResults.dominantOption === 'B' ? 'Secure' :
-                             quizResults.dominantOption === 'C' ? 'Avoidant' : 'Unknown'}
+                            {quizResults.style === 'A' ? 'Anxious' :
+                             quizResults.style === 'B' ? 'Secure' :
+                             quizResults.style === 'C' ? 'Avoidant' : 'Unknown'}
                         </Text>
                         
-                        {quizResults.interpretation && (
+                        {/* ✅ FIX: Use "scoringKeyDesc" not "interpretation" */}
+                        {quizResults.scoringKeyDesc && (
                             <Text style={styles.resultDescription}>
-                                {quizResults.interpretation}
+                                {quizResults.scoringKeyDesc}
                             </Text>
                         )}
                     </View>
@@ -209,24 +216,25 @@ function UserStyleQuizScreen({ route, navigation }) {
                     <View style={styles.scoresCard}>
                         <Text style={styles.scoresTitle}>Score Breakdown</Text>
                         
+                        {/* ✅ FIX: Use "groupScores" not "columnScores" */}
                         <View style={styles.scoreRow}>
                             <Text style={styles.scoreLabel}>Anxious (A)</Text>
                             <Text style={styles.scoreValue}>
-                                {quizResults.columnScores?.A || 0}
+                                {quizResults.groupScores?.A || 0}
                             </Text>
                         </View>
                         
                         <View style={styles.scoreRow}>
                             <Text style={styles.scoreLabel}>Secure (B)</Text>
                             <Text style={styles.scoreValue}>
-                                {quizResults.columnScores?.B || 0}
+                                {quizResults.groupScores?.B || 0}
                             </Text>
                         </View>
                         
                         <View style={styles.scoreRow}>
                             <Text style={styles.scoreLabel}>Avoidant (C)</Text>
                             <Text style={styles.scoreValue}>
-                                {quizResults.columnScores?.C || 0}
+                                {quizResults.groupScores?.C || 0}
                             </Text>
                         </View>
                     </View>
@@ -245,6 +253,7 @@ function UserStyleQuizScreen({ route, navigation }) {
                         <Text style={styles.homeButtonText}>Go to Home</Text>
                     </TouchableOpacity>
                 </ScrollView>
+                <AppFooter navigation={navigation} />
             </SafeAreaView>
         );
     }
@@ -386,7 +395,7 @@ function UserStyleQuizScreen({ route, navigation }) {
                     )}
                 </View>
             </View>
-            <AppFooter />
+            <AppFooter navigation={navigation} />
         </SafeAreaView>
     );
 }
@@ -577,6 +586,7 @@ const styles = StyleSheet.create({
     resultsContainer: {
         padding: 20,
         alignItems: 'center',
+        paddingBottom: 100,
     },
     resultsTitle: {
         fontSize: 28,

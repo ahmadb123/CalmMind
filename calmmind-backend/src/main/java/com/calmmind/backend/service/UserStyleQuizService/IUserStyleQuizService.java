@@ -12,4 +12,6 @@ public interface IUserStyleQuizService{
     void submitQuiz(Long userId, List<UserStyleQuizSubmissionDTO> answers);
     // get computed quiz results
     UserStyleQuizResultsDTO getResults(Long userId);
+    // has user taken quiz?
+    boolean hasUserTakenQuiz(Long userId);
 }   

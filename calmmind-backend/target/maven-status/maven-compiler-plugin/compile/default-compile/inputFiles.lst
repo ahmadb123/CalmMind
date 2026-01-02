@@ -23,6 +23,7 @@
 /Users/ahmadbishara/Desktop/CalmMind/CalmMind-Backend/src/main/java/com/calmmind/backend/model/UserAttachmentStyle/UserStyleQuizResponse.java
 /Users/ahmadbishara/Desktop/CalmMind/CalmMind-Backend/src/main/java/com/calmmind/backend/controller/AffirmationController.java
 /Users/ahmadbishara/Desktop/CalmMind/CalmMind-Backend/src/main/java/com/calmmind/backend/model/AttachmentStyle.java
+/Users/ahmadbishara/Desktop/CalmMind/CalmMind-Backend/src/main/java/com/calmmind/backend/model/UserAttachmentStyle/UserStyleQuizResults.java
 /Users/ahmadbishara/Desktop/CalmMind/CalmMind-Backend/src/main/java/com/calmmind/backend/model/PartnerStyleModel/PartnerStyleQuestionGroup.java
 /Users/ahmadbishara/Desktop/CalmMind/CalmMind-Backend/src/main/java/com/calmmind/backend/dto/AnxietyReliefFeatureDTO.java
 /Users/ahmadbishara/Desktop/CalmMind/CalmMind-Backend/src/main/java/com/calmmind/backend/AnxietyFeature/AnxietyReliefFeature.java
@@ -46,6 +47,7 @@
 /Users/ahmadbishara/Desktop/CalmMind/CalmMind-Backend/src/main/java/com/calmmind/backend/model/RemindersAndNotes.java
 /Users/ahmadbishara/Desktop/CalmMind/CalmMind-Backend/src/main/java/com/calmmind/backend/service/RemindersAndNotesService.java
 /Users/ahmadbishara/Desktop/CalmMind/CalmMind-Backend/src/main/java/com/calmmind/backend/dto/UserStyleQuizResultsDTO.java
+/Users/ahmadbishara/Desktop/CalmMind/CalmMind-Backend/src/main/java/com/calmmind/backend/repository/UserStyleQuizRepo/UserStyleQuizResultsRepository.java
 /Users/ahmadbishara/Desktop/CalmMind/CalmMind-Backend/src/main/java/com/calmmind/backend/controller/OpenAIController.java
 /Users/ahmadbishara/Desktop/CalmMind/CalmMind-Backend/src/main/java/com/calmmind/backend/service/IAnxietyReliefToolFeatureService.java
 /Users/ahmadbishara/Desktop/CalmMind/CalmMind-Backend/src/main/java/com/calmmind/backend/dto/RegisterRequest.java

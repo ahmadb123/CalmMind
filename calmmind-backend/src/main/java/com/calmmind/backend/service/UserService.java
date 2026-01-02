@@ -58,15 +58,32 @@ public class UserService implements IUserService {
     }
     @Override 
     public User getUserById(Long id){
-        return userRepo.findById(id).isPresent()? userRepo.findById(id).get():null;
+        return userRepo.findById(id).isPresent() ? userRepo.findById(id).get() : null;
     }
     @Override 
     public boolean isUsernameAvailable(String username){
         return !userRepo.existsByUsername(username);
     }
     @Override 
+    public void updateUserAttachmentStyle(Long userId, String quizStyle){
+        User user = userRepo.findById(userId)
+            .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        AttachmentStyle attachmentStyle = mapQuizStyleAttachmentStyle(quizStyle);
+        user.setAttachmentStyle(attachmentStyle);
+        userRepo.save(user);
+    }
+    @Override 
     // deleting user should delete all related data (quiz results, responses, affirmations, etc.)
     public void deleteUser(Long id){
         userRepo.deleteById(id);
+    }
+
+    private AttachmentStyle mapQuizStyleAttachmentStyle(String quizStyle){
+        return switch(quizStyle){
+            case "A" -> AttachmentStyle.ANXIOUS;
+            case "B" -> AttachmentStyle.SECURE;
+            case "C" -> AttachmentStyle.AVOIDANT;
+            default -> AttachmentStyle.GENERAL;
+        };
     }
 }
